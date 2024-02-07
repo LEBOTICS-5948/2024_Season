@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Subsystems.DriveTrain;
 import frc.robot.Subsystems.Intake;
 import frc.robot.Subsystems.LiftingArms;
+import frc.robot.Subsystems.Shooter;
 import frc.robot.Subsystems.Intake.IntakeState;
 
 public class Robot extends TimedRobot {
@@ -15,8 +16,11 @@ public class Robot extends TimedRobot {
   private final DriveTrain swerve = DriveTrain.getInstance();
   private final LiftingArms liftingArms = LiftingArms.getInstance();
   private final Intake intake = Intake.getInstance();
+  private final Shooter shooter = Shooter.getInstance();
   private double DEADBAND = 0;
   private boolean FieldRelativeTeleop = true;
+  private boolean shooterON = false;
+  
 
   @Override
   public void robotInit() {
@@ -29,6 +33,7 @@ public class Robot extends TimedRobot {
     swerve.periodic();
     liftingArms.periodic();
     intake.periodic();
+    shooter.periodic();
   } 
 
   @Override
@@ -40,6 +45,7 @@ public class Robot extends TimedRobot {
     driveWithController(FieldRelativeTeleop);
     liftWithController();
     intakeWithController();
+    shooterWithController();
   }
 
   @Override
@@ -75,10 +81,20 @@ public class Robot extends TimedRobot {
     }else if(controller.getYButton()){
       intake.setState(IntakeState.CUSTOM);
     }else if(controller.getRightBumper()){
-      intake.shoot();
+      intake.shoot(0.8);
     }
     intake.runState();
-    
+  }
+
+  private void shooterWithController(){
+    if(controller.getLeftBumperPressed()){
+      shooterON = !shooterON;
+      if(shooterON){
+        shooter.startShooter();
+      }else{
+        shooter.stopShooter();
+      }
+    }
   }
 }
 

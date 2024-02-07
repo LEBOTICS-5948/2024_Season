@@ -2,12 +2,12 @@ package frc.robot.Subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -40,26 +40,21 @@ public class Intake extends SubsystemBase{
 
     private final SparkMaxPIDController rollerPIDController;
     private final SparkMaxPIDController anglePIDController;
-    private boolean loaded;
-    private DutyCycleEncoder hexEncoder;
 
     private Intake(){
-        
-        hexEncoder = new DutyCycleEncoder(2);
-        hexEncoder.setDistancePerRotation(360);
-        hexEncoder.setPositionOffset(0.33);
         loadedLimitSwitch = new DigitalInput(0);
         zeroArmLimitSwitch = new DigitalInput(9);
         rollerMotor = new CANSparkMax(15, MotorType.kBrushless);
         angleMotor = new CANSparkMax(16, MotorType.kBrushless);
         angleMotor.setInverted(true);
         rollerEncoder = rollerMotor.getEncoder();
-        angleEncoder = angleMotor.getEncoder();
+        angleEncoder = angleMotor.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
 
-        angleEncoder.setPositionConversionFactor(360/300);
+        angleEncoder.setPositionConversionFactor(360);
 
         rollerPIDController = rollerMotor.getPIDController();
         anglePIDController = angleMotor.getPIDController();
+        anglePIDController.setFeedbackDevice(angleEncoder);
 
         double kV_P, kV_I, kV_D, kV_Iz, kV_FF, kV_MaxOutput, kV_MinOutput;
         // PID coefficients kVelocity
@@ -80,7 +75,7 @@ public class Intake extends SubsystemBase{
 
         double kP_P, kP_I, kP_D, kP_Iz, kP_FF, kP_MaxOutput, kP_MinOutput;
         // PID coefficients kPosition
-        kP_P = 0.02; 
+        kP_P = 0.04; 
         kP_I = 0;
         kP_D = 0; 
         kP_Iz = 0; 
@@ -102,9 +97,7 @@ public class Intake extends SubsystemBase{
         SmartDashboard.putBoolean("LS_roller", loadedLimitSwitch.get());
         SmartDashboard.putBoolean("LS_ARM", zeroArmLimitSwitch.get());
         SmartDashboard.putString("INTAKE_STATE", state.name());
-        SmartDashboard.putNumber("encoder", hexEncoder.getDistance());
         SmartDashboard.putNumber("encoder1", angleEncoder.getPosition());
-        SmartDashboard.putNumber("en", hexEncoder.get());
         if(zeroArmLimitSwitch.get()){
             angleEncoder.setPosition(0);
         }
@@ -115,7 +108,7 @@ public class Intake extends SubsystemBase{
         if(loadedLimitSwitch.get()){
             stop_take();
         }
-        anglePIDController.setReference(-201, ControlType.kPosition);
+        anglePIDController.setReference(-198, ControlType.kPosition);
         if(angleEncoder.getPosition() < -150){
             rollerMotor.set(-0.6);
         }
@@ -128,6 +121,7 @@ public class Intake extends SubsystemBase{
         }else{
             anglePIDController.setReference(0, ControlType.kPosition);
         }
+        rollerMotor.set(1);
     }
 
     private void stop_take(){
@@ -142,11 +136,10 @@ public class Intake extends SubsystemBase{
 
     private void CUSTOM(){
         state = IntakeState.CUSTOM;
-        anglePIDController.setReference(-90, ControlType.kPosition);
+        anglePIDController.setReference(-70, ControlType.kPosition);
     }
 
     public void runState(){
-        angleEncoder.setPosition(hexEncoder.getDistance());
         if(state == IntakeState.STOP){
             stop_take();
         }else if(state == IntakeState.DOWN){
@@ -161,9 +154,10 @@ public class Intake extends SubsystemBase{
     public void setState(IntakeState new_state){
         state = new_state;
     }
-    public void shoot(){
+    
+    public void shoot(double speed){
         if(state == IntakeState.CUSTOM){
-            rollerMotor.set(1);
+            rollerMotor.set(speed);
         }
     }
 }
