@@ -9,6 +9,8 @@ import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase{
@@ -22,24 +24,27 @@ public class Intake extends SubsystemBase{
     }
 
     public enum IntakeState {
+        IDLE,
         STOP,
         DOWN,
         UP,
-        CUSTOM
+        AMP,
+        SPEAKER,
     }
 
-    private IntakeState state = IntakeState.STOP;
+    private IntakeState state, lastState;
 
     private final DigitalInput loadedLimitSwitch;
     private final DigitalInput zeroArmLimitSwitch;
     private final CANSparkMax rollerMotor;
     private final CANSparkMax angleMotor;
 
-    private final RelativeEncoder rollerEncoder;
     private final RelativeEncoder angleEncoder;
 
-    private final SparkMaxPIDController rollerPIDController;
     private final SparkMaxPIDController anglePIDController;
+
+    public boolean isIntaking = false;
+    public boolean isLoaded = false;
 
     private Intake(){
         loadedLimitSwitch = new DigitalInput(0);
@@ -47,35 +52,16 @@ public class Intake extends SubsystemBase{
         rollerMotor = new CANSparkMax(15, MotorType.kBrushless);
         angleMotor = new CANSparkMax(16, MotorType.kBrushless);
         angleMotor.setInverted(true);
-        rollerEncoder = rollerMotor.getEncoder();
-        angleEncoder = angleMotor.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
 
+        angleEncoder = angleMotor.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
         angleEncoder.setPositionConversionFactor(360);
 
-        rollerPIDController = rollerMotor.getPIDController();
         anglePIDController = angleMotor.getPIDController();
         anglePIDController.setFeedbackDevice(angleEncoder);
 
-        double kV_P, kV_I, kV_D, kV_Iz, kV_FF, kV_MaxOutput, kV_MinOutput;
-        // PID coefficients kVelocity
-        kV_P = 0.06; 
-        kV_I = 0;
-        kV_D = 0; 
-        kV_Iz = 0; 
-        kV_FF = 0.3; 
-        kV_MaxOutput = 1; 
-        kV_MinOutput = -1;
-        // set PID coefficients
-        rollerPIDController.setP(kV_P);
-        rollerPIDController.setI(kV_I);
-        rollerPIDController.setD(kV_D);
-        rollerPIDController.setIZone(kV_Iz);
-        rollerPIDController.setFF(kV_FF);
-        rollerPIDController.setOutputRange(kV_MinOutput, kV_MaxOutput);
-
         double kP_P, kP_I, kP_D, kP_Iz, kP_FF, kP_MaxOutput, kP_MinOutput;
         // PID coefficients kPosition
-        kP_P = 0.04; 
+        kP_P = 0.2; 
         kP_I = 0;
         kP_D = 0; 
         kP_Iz = 0; 
@@ -90,74 +76,123 @@ public class Intake extends SubsystemBase{
         anglePIDController.setIZone(kP_Iz);
         anglePIDController.setFF(kP_FF);
         anglePIDController.setOutputRange(kP_MinOutput, kP_MaxOutput);
+
+        state = IntakeState.IDLE;
     }
 
     @Override
     public void periodic(){
-        SmartDashboard.putBoolean("LS_roller", loadedLimitSwitch.get());
+        isLoaded = loadedLimitSwitch.get();
+        if(zeroArmLimitSwitch.get()){ angleEncoder.setPosition(0); }
+        if(isIntaking && isLoaded){ state = IntakeState.STOP; }
+        runState();
+        SmartDashboard.putNumber("INTAKE_ANGLE", angleEncoder.getPosition());
+        SmartDashboard.putBoolean("LS_ROLLER", isLoaded);
         SmartDashboard.putBoolean("LS_ARM", zeroArmLimitSwitch.get());
-        SmartDashboard.putString("INTAKE_STATE", state.name());
-        SmartDashboard.putNumber("encoder1", angleEncoder.getPosition());
-        if(zeroArmLimitSwitch.get()){
-            angleEncoder.setPosition(0);
-        }
+        SmartDashboard.putBoolean("isIntaking", isIntaking);
     }
 
-    private void down_take(){
-        state = IntakeState.DOWN;
-        if(loadedLimitSwitch.get()){
-            stop_take();
-        }
-        anglePIDController.setReference(-198, ControlType.kPosition);
-        if(angleEncoder.getPosition() < -150){
-            rollerMotor.set(-0.6);
-        }
-    }
-
-    private void up_take(){
-        state = IntakeState.UP;
-        if(zeroArmLimitSwitch.get()){
-            angleMotor.stopMotor();
-        }else{
-            anglePIDController.setReference(0, ControlType.kPosition);
-        }
-        rollerMotor.set(1);
-    }
-
-    private void stop_take(){
-        state = IntakeState.STOP;
-        rollerMotor.stopMotor();
-        if(zeroArmLimitSwitch.get()){
-            angleMotor.stopMotor();
-        }else{
-            anglePIDController.setReference(0, ControlType.kPosition);
-        }
-    }
-
-    private void CUSTOM(){
-        state = IntakeState.CUSTOM;
-        anglePIDController.setReference(-70, ControlType.kPosition);
-    }
-
-    public void runState(){
-        if(state == IntakeState.STOP){
-            stop_take();
-        }else if(state == IntakeState.DOWN){
-            down_take();
-        }else if(state == IntakeState.UP){
-            up_take();
-        }else if(state == IntakeState.CUSTOM){
-            CUSTOM();
-        }
-    }
-
-    public void setState(IntakeState new_state){
-        state = new_state;
+    public Command setState(IntakeState _state) {
+        return Commands.runOnce(() -> state = _state);
     }
     
-    public void shoot(double speed){
-        if(state == IntakeState.CUSTOM){
-            rollerMotor.set(speed);
+    public IntakeState getState() {
+        return state;
+    }
+
+    private void runState(){
+        Command currentIntakeCommand = null;
+        if(!state.equals(lastState)){
+            SmartDashboard.putString("INTAKE_STATE", state.name());
+            switch(state){
+                case IDLE:
+                    isIntaking = false;
+                    currentIntakeCommand = idle_take();
+                    break;
+                case STOP:
+                    currentIntakeCommand = stop_take().finallyDo((i) -> isIntaking = false);
+                    break;
+                case DOWN:
+                    isIntaking = true;
+                    currentIntakeCommand = down_take();
+                    break;
+                case UP:
+                    isIntaking = true;
+                    currentIntakeCommand = up_take();
+                    break;
+                case AMP:
+                    isIntaking = false;
+                    currentIntakeCommand = amp_take();
+                    break;
+                case SPEAKER:
+                    isIntaking = false;
+                    currentIntakeCommand = speaker_take();
+                    break;
+                default:
+                    state = IntakeState.STOP;
+                    break;
+            }
+
+            lastState = state;
+
+            if (currentIntakeCommand != null){
+                currentIntakeCommand.schedule();
+            }
         }
+    }
+
+    private Command idle_take(){
+        return Commands.runOnce(() -> {
+            rollerMotor.disable();
+            angleMotor.disable();
+        },this);
+    }
+
+    private Command down_take(){
+        return Commands.sequence(
+            pivot(-194).andThen(rollers(-0.7))
+        );
+    }
+
+    private Command up_take(){
+        return Commands.sequence(
+            pivot(0).andThen(rollers(-0.7))
+        );
+    }
+
+    private Command stop_take(){
+        return Commands.sequence(
+            Commands.runOnce(() -> rollerMotor.stopMotor()),
+            pivot(0)
+        );
+    }
+
+    private Command amp_take(){
+        return Commands.sequence(
+            pivot(-70).andThen(
+                Commands.runOnce(() -> angleMotor.stopMotor()),
+                Commands.waitSeconds(0.2),rollers(0.8),
+                Commands.waitSeconds(0.4),setState(IntakeState.STOP)
+            )
+        );
+    }
+
+    private Command speaker_take(){
+        return Commands.sequence(
+            pivot(0),
+            rollers(1),
+            Commands.waitSeconds(1),
+            setState(IntakeState.STOP)
+        );
+    }
+
+    private Command pivot(double position){
+        return Commands.run(() -> {
+            anglePIDController.setReference(position, ControlType.kPosition);
+        },this).until(() -> (Math.abs(position-angleEncoder.getPosition()) < 1));
+    }
+
+    private Command rollers(double speed){
+        return Commands.runOnce(() -> rollerMotor.set(speed),this);
     }
 }

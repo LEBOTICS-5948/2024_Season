@@ -7,6 +7,8 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase{
@@ -19,6 +21,11 @@ public class Shooter extends SubsystemBase{
         return m_instance;
     }
 
+    public enum ShooterState{
+        START,
+        STOP
+    }
+
     private final CANSparkMax r_ShooterMotor = new CANSparkMax(17, MotorType.kBrushless);
     private final CANSparkMax l_ShooterMotor = new CANSparkMax(18, MotorType.kBrushless);
 
@@ -28,12 +35,19 @@ public class Shooter extends SubsystemBase{
     private final SparkMaxPIDController r_PIDController;
     private final SparkMaxPIDController l_PIDController;
 
-    private boolean isReady = false;
+    private ShooterState state, lastState;
+
+    public boolean isReady = false;
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("r_shooter", r_ShooterEncoder.getVelocity());
-        SmartDashboard.putNumber("l_shooter", l_ShooterEncoder.getVelocity());
+        runState();
+        if(state.equals(ShooterState.START) && r_ShooterEncoder.getVelocity()>5000 && l_ShooterEncoder.getVelocity()>5000){
+            isReady = true;
+        }
+        SmartDashboard.putBoolean("SHOOTER_isReady", isReady);
+        SmartDashboard.putNumber("r", r_ShooterEncoder.getVelocity());
+        SmartDashboard.putNumber("l", l_ShooterEncoder.getVelocity());
     }
 
     private Shooter(){
@@ -51,7 +65,7 @@ public class Shooter extends SubsystemBase{
         kV_I = 0;
         kV_D = 0; 
         kV_Iz = 0; 
-        kV_FF = 0.00017; 
+        kV_FF = 0.0002; 
         kV_MaxOutput = 1; 
         kV_MinOutput = -1;
         // set PID coefficients
@@ -68,15 +82,55 @@ public class Shooter extends SubsystemBase{
         l_PIDController.setIZone(kV_Iz);
         l_PIDController.setFF(kV_FF);
         l_PIDController.setOutputRange(kV_MinOutput, kV_MaxOutput);
+
+        state = ShooterState.STOP;
     }
 
-    public void startShooter(){
-        r_PIDController.setReference(6000 , ControlType.kVelocity);
-        l_PIDController.setReference(6000 , ControlType.kVelocity);
+    public Command setState(ShooterState _state) {
+        return Commands.runOnce(() -> state = _state);
+    }
+    
+    public ShooterState getState() {
+        return state;
     }
 
-    public void stopShooter(){
-        r_ShooterMotor.disable();
-        l_ShooterMotor.disable();
+    private void runState(){
+        Command currentShooterCommand = null;
+        if(!state.equals(lastState)){
+            SmartDashboard.putString("SHOOTER_STATE", state.name());
+            switch(state){
+                case START:
+                    currentShooterCommand = startShooter();
+                    break;
+                case STOP:
+                    isReady = false;
+                    currentShooterCommand = stopShooter();
+                    break;
+                default:
+                    isReady = false;
+                    state = ShooterState.STOP;
+                    break;
+            }
+
+            lastState = state;
+
+            if (currentShooterCommand != null){
+                currentShooterCommand.schedule();
+            }
+        }
+    }
+
+    private Command startShooter(){
+        return Commands.runOnce(() -> {
+            r_PIDController.setReference(5100 , ControlType.kVelocity);
+            l_PIDController.setReference(5100 , ControlType.kVelocity);
+        }, this);
+    }
+
+    private Command stopShooter(){
+        return Commands.runOnce(() -> {
+            r_ShooterMotor.disable();
+            l_ShooterMotor.disable();
+        }, this);
     }
 }

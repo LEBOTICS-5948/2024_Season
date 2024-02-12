@@ -6,15 +6,12 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LiftingArmsConstants;
 
 public class LiftingArms extends SubsystemBase{
-    private CANSparkMax leftArmMotor;
-    private CANSparkMax rightArmMotor;
-    private RelativeEncoder leftArmEncoder;
-    private RelativeEncoder rightArmEncoder;
-    
 
     private static LiftingArms m_instance = null;
 
@@ -25,49 +22,106 @@ public class LiftingArms extends SubsystemBase{
         return m_instance;
     }
 
+    public enum LiftingArmsState{
+        UP,
+        DOWN,
+        STOP
+    }
+
+    private CANSparkMax leftArmMotor;
+    private CANSparkMax rightArmMotor;
+    //private RelativeEncoder leftArmEncoder;
+    //private RelativeEncoder rightArmEncoder;
+
+    private LiftingArmsState state, lastState;
+    
+
     private LiftingArms() {
-        leftArmMotor = new CANSparkMax(LiftingArmsConstants.leftArmID, MotorType.kBrushless);
+        leftArmMotor = new CANSparkMax(LiftingArmsConstants.LeftArmID, MotorType.kBrushless);
         leftArmMotor.restoreFactoryDefaults();
         leftArmMotor.setIdleMode(IdleMode.kBrake);
         leftArmMotor.setOpenLoopRampRate(0.4);
 
-        rightArmMotor = new CANSparkMax(LiftingArmsConstants.rightArmID, MotorType.kBrushless);
+        rightArmMotor = new CANSparkMax(LiftingArmsConstants.RightArmID, MotorType.kBrushless);
         rightArmMotor.restoreFactoryDefaults();
         rightArmMotor.setIdleMode(IdleMode.kBrake);
         rightArmMotor.setOpenLoopRampRate(0.4);
 
-        leftArmEncoder = leftArmMotor.getEncoder();
-        rightArmEncoder = rightArmMotor.getEncoder();
+        //leftArmEncoder = leftArmMotor.getEncoder();
+        //rightArmEncoder = rightArmMotor.getEncoder();
 
         leftArmMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kForward, true);
         leftArmMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, true);
         leftArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, 0);
-        leftArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, -93.5f);
+        leftArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, -LiftingArmsConstants.SoftLimit);
 
         rightArmMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kForward, true);
         rightArmMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, true);
-        rightArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, 93.5f);
+        rightArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, LiftingArmsConstants.SoftLimit);
         rightArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, 0); 
+
+        state = LiftingArmsState.STOP;
+        
     }
 
     @Override
     public void periodic(){
-        SmartDashboard.putNumber("leftPos", leftArmEncoder.getPosition()/-93.5);
-        SmartDashboard.putNumber("rightPos", rightArmEncoder.getPosition()/93.5);
+        runState();
     }
 
-    public void retractArms(){
-        leftArmMotor.set(0.5);
-        rightArmMotor.set(-0.5);
+    public Command setState(LiftingArmsState _state) {
+        return Commands.runOnce(() -> state = _state);
+    }
+    
+    public LiftingArmsState getState() {
+        return state;
     }
 
-    public void extendArms(){
-        leftArmMotor.set(-0.5);
-        rightArmMotor.set(0.5);
+    private void runState(){
+        Command currentArmsCommand = null;
+        if(!state.equals(lastState)){
+            SmartDashboard.putString("LIFTING_ARMS_STATE", state.name());
+            switch(state){
+                case STOP:
+                    currentArmsCommand = stopArms();
+                    break;
+                case DOWN:
+                    currentArmsCommand = retractArms();
+                    break;
+                case UP:
+                    currentArmsCommand = extendArms();
+                    break;
+                default:
+                    state = LiftingArmsState.STOP;
+                    break;
+            }
+
+            lastState = state;
+
+            if (currentArmsCommand != null){
+                currentArmsCommand.schedule();
+            }
+        }
     }
 
-    public void stopArms(){
-        leftArmMotor.stopMotor();
-        rightArmMotor.stopMotor();
+    public Command retractArms(){
+        return Commands.runOnce(() -> {
+            leftArmMotor.set(0.6);
+            rightArmMotor.set(-0.6);
+        },this);
+    }
+
+    public Command extendArms(){
+        return Commands.runOnce(() -> {
+            leftArmMotor.set(-0.9);
+            rightArmMotor.set(0.9);
+        },this);
+    }
+
+    public Command stopArms(){
+        return Commands.runOnce(() -> {
+            leftArmMotor.stopMotor();
+            rightArmMotor.stopMotor();
+        },this);
     }
 }

@@ -13,7 +13,7 @@ public class Constants {
         public static final double DriveGearRatio = 8.311;
         public static final String CANbus = "rio";
         private static final double WheelToWheelDistance = 0.48895;
-        public final static SwerveDriveKinematics m_kinematics = 
+        public final static SwerveDriveKinematics Kinematics = 
         new SwerveDriveKinematics(
             new Translation2d(-WheelToWheelDistance/2,-WheelToWheelDistance/2), //Rear Left Module
             new Translation2d(-WheelToWheelDistance/2,WheelToWheelDistance/2), //Front left Module
@@ -21,8 +21,9 @@ public class Constants {
             new Translation2d(WheelToWheelDistance/2,-WheelToWheelDistance/2)); //Rear Right Module
     }
     public static class LiftingArmsConstants{
-        public static final int leftArmID = 13;
-        public static final int rightArmID = 14;
+        public static final int LeftArmID = 13;
+        public static final int RightArmID = 14;
+        public static final float SoftLimit = 93.5f;
     }
 
 }
