@@ -19,7 +19,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
     robotContainer = new RobotContainer();
-    //addPeriodic(robotContainer.controlLoop(), 0.01, 0.005);
+    addPeriodic(robotContainer.controlLoop(), 0.01, 0.005);
   } 
   
   @Override

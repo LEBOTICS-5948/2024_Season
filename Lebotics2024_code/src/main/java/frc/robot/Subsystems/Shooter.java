@@ -1,5 +1,7 @@
 package frc.robot.Subsystems;
 
+import java.lang.annotation.Target;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -22,7 +24,8 @@ public class Shooter extends SubsystemBase{
     }
 
     public enum ShooterState{
-        START,
+        START_HIGHT,
+        START_LOW,
         STOP
     }
 
@@ -39,10 +42,12 @@ public class Shooter extends SubsystemBase{
 
     public boolean isReady = false;
 
+    private double targetRPM;
+
     @Override
     public void periodic(){
         runState();
-        if(state.equals(ShooterState.START) && r_ShooterEncoder.getVelocity()>5000 && l_ShooterEncoder.getVelocity()>5000){
+        if((!state.equals(ShooterState.STOP)) && r_ShooterEncoder.getVelocity()>targetRPM && l_ShooterEncoder.getVelocity()>targetRPM){
             isReady = true;
         }
         SmartDashboard.putBoolean("SHOOTER_isReady", isReady);
@@ -99,8 +104,11 @@ public class Shooter extends SubsystemBase{
         if(!state.equals(lastState)){
             SmartDashboard.putString("SHOOTER_STATE", state.name());
             switch(state){
-                case START:
-                    currentShooterCommand = startShooter();
+                case START_HIGHT:
+                    currentShooterCommand = startShooter(5100);
+                    break;
+                case START_LOW:
+                    currentShooterCommand = startShooter(3100);
                     break;
                 case STOP:
                     isReady = false;
@@ -120,10 +128,11 @@ public class Shooter extends SubsystemBase{
         }
     }
 
-    private Command startShooter(){
+    private Command startShooter(double speed){
         return Commands.runOnce(() -> {
-            r_PIDController.setReference(5100 , ControlType.kVelocity);
-            l_PIDController.setReference(5100 , ControlType.kVelocity);
+            targetRPM = speed-100;
+            r_PIDController.setReference(speed , ControlType.kVelocity);
+            l_PIDController.setReference(speed , ControlType.kVelocity);
         }, this);
     }
 

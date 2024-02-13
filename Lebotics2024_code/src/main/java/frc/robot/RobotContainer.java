@@ -5,7 +5,6 @@ import frc.robot.Subsystems.DriveTrain;
 import frc.robot.Subsystems.Intake;
 import frc.robot.Subsystems.LiftingArms;
 import frc.robot.Subsystems.Shooter;
-import frc.robot.Subsystems.DriveTrain.DriveTrainState;
 import frc.robot.Subsystems.Intake.IntakeState;
 import frc.robot.Subsystems.LiftingArms.LiftingArmsState;
 import frc.robot.Subsystems.Shooter.ShooterState;
@@ -31,11 +30,11 @@ public class RobotContainer {
             () -> -driverController.getRightX()
         );
         
+        driverController.y()
+            .toggleOnTrue(swerveDrive.setRotationSuplier(true, -30d))
+            .toggleOnFalse(swerveDrive.setRotationSuplier(false, null)); 
         driverController.x()
             .toggleOnTrue(swerveDrive.setRotationSuplier(true, -90d))
-            .toggleOnFalse(swerveDrive.setRotationSuplier(false, null)); 
-        driverController.y()
-            .toggleOnTrue(swerveDrive.setRotationSuplier(true, 135d))
             .toggleOnFalse(swerveDrive.setRotationSuplier(false, null)); 
 
         // Operator Conrols
@@ -44,8 +43,11 @@ public class RobotContainer {
         operatorController.x().toggleOnTrue(intake.setState(IntakeState.UP));
         operatorController.y().toggleOnTrue(intake.setState(IntakeState.AMP));  
 
+        operatorController.leftBumper()
+            .toggleOnTrue(shooter.setState(ShooterState.START_LOW))
+            .toggleOnFalse(shooter.setState(ShooterState.STOP));
         operatorController.leftTrigger()
-            .toggleOnTrue(shooter.setState(ShooterState.START))
+            .toggleOnTrue(shooter.setState(ShooterState.START_HIGHT))
             .toggleOnFalse(shooter.setState(ShooterState.STOP));
         (operatorController.rightTrigger().and(() -> shooter.isReady && !intake.isIntaking))
             .toggleOnTrue(intake.setState(IntakeState.SPEAKER));
@@ -57,4 +59,10 @@ public class RobotContainer {
             .toggleOnTrue(liftingArms.setState(LiftingArmsState.DOWN))
             .toggleOnFalse(liftingArms.setState(LiftingArmsState.STOP)); 
     }
+
+    public Runnable controlLoop() {
+		return () -> {
+
+		};
+	}
 }

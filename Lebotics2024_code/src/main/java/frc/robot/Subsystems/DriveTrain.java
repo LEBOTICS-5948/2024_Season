@@ -121,7 +121,6 @@ public class DriveTrain extends SubsystemBase{
                         });
                     break;
                 case JOYSTICKS:
-                    System.out.println("hola negro");
                     currentDriveCommand = teleopDrive()
                         .until(() -> !isJoystickInputPresent())
                         .finallyDo((interrupted) -> {

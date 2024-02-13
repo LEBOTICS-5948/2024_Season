@@ -5,6 +5,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxAlternateEncoder;
 import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMax.ControlType;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -50,8 +51,12 @@ public class Intake extends SubsystemBase{
         loadedLimitSwitch = new DigitalInput(0);
         zeroArmLimitSwitch = new DigitalInput(9);
         rollerMotor = new CANSparkMax(15, MotorType.kBrushless);
+        rollerMotor.restoreFactoryDefaults();
+        rollerMotor.setIdleMode(IdleMode.kCoast);
         angleMotor = new CANSparkMax(16, MotorType.kBrushless);
+        angleMotor.restoreFactoryDefaults();
         angleMotor.setInverted(true);
+        angleMotor.setIdleMode(IdleMode.kBrake);
 
         angleEncoder = angleMotor.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
         angleEncoder.setPositionConversionFactor(360);
@@ -61,7 +66,7 @@ public class Intake extends SubsystemBase{
 
         double kP_P, kP_I, kP_D, kP_Iz, kP_FF, kP_MaxOutput, kP_MinOutput;
         // PID coefficients kPosition
-        kP_P = 0.2; 
+        kP_P = 0.1; 
         kP_I = 0;
         kP_D = 0; 
         kP_Iz = 0; 
@@ -143,27 +148,30 @@ public class Intake extends SubsystemBase{
 
     private Command idle_take(){
         return Commands.runOnce(() -> {
+            angleMotor.setIdleMode(IdleMode.kCoast);
             rollerMotor.disable();
             angleMotor.disable();
-        },this);
+        },this).finallyDo((interrupted) -> {
+            angleMotor.setIdleMode(IdleMode.kBrake);
+        });
     }
 
     private Command down_take(){
         return Commands.sequence(
-            pivot(-194).andThen(rollers(-0.7))
+            pivot(-194).andThen(stopArm()).andThen(rollers(-0.7))
         );
     }
 
     private Command up_take(){
         return Commands.sequence(
-            pivot(0).andThen(rollers(-0.7))
+            pivot(-60).andThen(stopArm()).andThen(rollers(-0.7))
         );
     }
 
     private Command stop_take(){
         return Commands.sequence(
             Commands.runOnce(() -> rollerMotor.stopMotor()),
-            pivot(0)
+            pivot(0).andThen(stopArm())
         );
     }
 
@@ -189,10 +197,14 @@ public class Intake extends SubsystemBase{
     private Command pivot(double position){
         return Commands.run(() -> {
             anglePIDController.setReference(position, ControlType.kPosition);
-        },this).until(() -> (Math.abs(position-angleEncoder.getPosition()) < 1));
+        },this).until(() -> (Math.abs(position-angleEncoder.getPosition()) < 1.5));
     }
 
     private Command rollers(double speed){
         return Commands.runOnce(() -> rollerMotor.set(speed),this);
+    }
+
+    private Command stopArm(){
+        return Commands.runOnce(() -> angleMotor.stopMotor(),this);
     }
 }
