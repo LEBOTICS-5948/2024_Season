@@ -1,0 +1,68 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.76,
+      "y": 6.61
+    },
+    "rotation": 60.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "l_left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "take"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "l_left-1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "retract"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
