@@ -49,7 +49,7 @@ public class Intake extends SubsystemBase{
     public boolean isLoaded = false;
 
     private Intake(){
-        loadedLimitSwitch = new DigitalInput(0);
+        loadedLimitSwitch = new DigitalInput(1);
         zeroArmLimitSwitch = new DigitalInput(9);
         rollerMotor = new CANSparkMax(15, MotorType.kBrushless);
         rollerMotor.restoreFactoryDefaults();
@@ -159,7 +159,7 @@ public class Intake extends SubsystemBase{
 
     private Command down_take(){
         return Commands.sequence(
-            pivot(-194).andThen(stopArm()).andThen(rollers(-0.9))
+            pivot(-192).andThen(stopArm()).andThen(rollers(-0.8))
         );
     }
 
@@ -184,9 +184,10 @@ public class Intake extends SubsystemBase{
 
     private Command amp_take(){
         return Commands.sequence(
-            pivot(-75).andThen(
+            rollers(-0.06),
+            pivot(-73).andThen(
                 Commands.runOnce(() -> angleMotor.stopMotor()),
-                Commands.waitSeconds(0.2),rollers(0.85),
+                Commands.waitSeconds(0.2),rollers(0.9),
                 Commands.waitSeconds(0.4),setState(IntakeState.STOP)
             )
         );

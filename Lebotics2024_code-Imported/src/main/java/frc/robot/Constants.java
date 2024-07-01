@@ -6,7 +6,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 public class Constants {
     public static class SwerveConstants{
         public static final double WheelDiameter = 0.0965;
-        public static final double DriveMaxSpeed = 2.0;
+        public static final double DriveMaxSpeed = 2.8;
         public static final double DriveMaxAcc = 0.2;
         public static final double TurningMaxAcc = 0.15;
         public static final double TurningGearRatio = 13.714;

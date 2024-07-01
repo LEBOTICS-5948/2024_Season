@@ -14,6 +14,18 @@
         {
           "type": "named",
           "data": {
+            "name": "startShooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.2
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "shoot"
           }
         },
@@ -57,7 +69,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "girar"
+            "pathName": "ml_girar"
           }
         },
         {
@@ -73,7 +85,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "girar-1"
+                  "pathName": "ml_girar-1"
                 }
               },
               {
@@ -95,6 +107,12 @@
           "type": "path",
           "data": {
             "pathName": "palante"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stopShooter"
           }
         }
       ]

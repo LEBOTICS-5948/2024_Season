@@ -29,27 +29,41 @@ public class RobotContainer {
 
     public RobotContainer(){
         NamedCommands.registerCommand("shoot", Commands.sequence(
-            shooter.setState(ShooterState.START_HIGHT),
-            Commands.waitSeconds(1),
-            intake.setState(IntakeState.SPEAKER).andThen(
-                Commands.waitSeconds(0.2),
-                shooter.setState(ShooterState.STOP)
-            )
+            intake.setState(IntakeState.SPEAKER),
+            Commands.waitSeconds(0.9)
+            
+        ));
+        NamedCommands.registerCommand("startShooter", Commands.sequence(
+            shooter.setState(ShooterState.START_HIGHT)
+        ));
+        NamedCommands.registerCommand("stopShooter", Commands.sequence(
+            shooter.setState(ShooterState.STOP)
         ));
         NamedCommands.registerCommand("take", Commands.sequence(
+            shooter.setState(ShooterState.STOP),
             intake.setState(IntakeState.DOWN),
             Commands.waitSeconds(0.5)
         ));
-        NamedCommands.registerCommand("retract", Commands.sequence(
-            Commands.waitSeconds(1.8),
-            intake.setState(IntakeState.STOP),
-            Commands.waitSeconds(0.5),
-            intake.setState(IntakeState.UP)
+        NamedCommands.registerCommand("amp", Commands.sequence(
+            intake.setState(IntakeState.AMP),
+            Commands.waitSeconds(0.5)
         ));
+        NamedCommands.registerCommand("retract", Commands.waitSeconds(0.5).andThen(shooter.setState(ShooterState.START_HIGHT)).andThen(retractifneeded()));
         configureBindings();
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Mode", autoChooser);  
+    }
 
+    private Command retractifneeded(){
+        if(intake.isLoaded && !intake.isIntaking){
+            return new Command(){};
+        }else{
+            return Commands.sequence(
+                intake.setState(IntakeState.STOP),
+                Commands.waitSeconds(0.5),
+                intake.setState(IntakeState.UP)
+            );
+        }
     }
 
     private void configureBindings(){
@@ -66,9 +80,9 @@ public class RobotContainer {
         operatorController.x().toggleOnTrue(intake.setState(IntakeState.UP));
         operatorController.y().toggleOnTrue(intake.setState(IntakeState.AMP));  
 
-        operatorController.leftBumper()
+        /* operatorController.leftBumper()
             .toggleOnTrue(shooter.setState(ShooterState.START_LOW))
-            .toggleOnFalse(shooter.setState(ShooterState.STOP));
+            .toggleOnFalse(shooter.setState(ShooterState.STOP)); */
         operatorController.leftTrigger()
             .toggleOnTrue(shooter.setState(ShooterState.START_HIGHT))
             .toggleOnFalse(shooter.setState(ShooterState.STOP));

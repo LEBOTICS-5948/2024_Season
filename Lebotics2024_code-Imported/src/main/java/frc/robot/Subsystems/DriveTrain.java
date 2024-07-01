@@ -97,7 +97,7 @@ public class DriveTrain extends SubsystemBase{
                 new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
                         new PIDConstants(4, 0.0, 0.0), // Translation PID constants
                         new PIDConstants(1, 0.0, 0.0), // Rotation PID constants
-                        2.0, // Max module speed, in m/s
+                        SwerveConstants.DriveMaxSpeed, // Max module speed, in m/s
                         0.34, // Drive base radius in meters. Distance from robot center to furthest module.
                         new ReplanningConfig() // Default path replanning config. See the API for the options here
                 ),
@@ -253,7 +253,7 @@ public class DriveTrain extends SubsystemBase{
         return new RunCommand(() -> {
             double xSpeed = MathUtil.applyDeadband(translationX.getAsDouble(), DEADBAND);
             double ySpeed = MathUtil.applyDeadband(translationY.getAsDouble(), DEADBAND);
-            double rot = (FieldRelativeTeleop&&useOmegaOverride) ? omegaOverride.getAsDouble(): MathUtil.applyDeadband(rotationOmega.getAsDouble()*2, DEADBAND);
+            double rot = (FieldRelativeTeleop&&useOmegaOverride) ? omegaOverride.getAsDouble(): MathUtil.applyDeadband(rotationOmega.getAsDouble()*1.8, DEADBAND);
 
             drive(xSpeed, ySpeed, rot, FieldRelativeTeleop);
         });

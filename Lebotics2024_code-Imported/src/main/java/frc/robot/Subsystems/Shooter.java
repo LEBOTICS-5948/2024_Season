@@ -54,8 +54,6 @@ public class Shooter extends SubsystemBase{
         SmartDashboard.putBoolean("SHOOTER_isReady", isReady);
         SmartDashboard.putNumber("r", r_ShooterEncoder.getVelocity());
         SmartDashboard.putNumber("l", l_ShooterEncoder.getVelocity());
-        double ss = SmartDashboard.getNumber("amp_shooter", 0);
-        if(ss != shooter_speed){ shooter_speed = ss;}
     }
 
     private Shooter(){
@@ -92,8 +90,6 @@ public class Shooter extends SubsystemBase{
         l_PIDController.setOutputRange(kV_MinOutput, kV_MaxOutput);
 
         state = ShooterState.STOP;
-
-        SmartDashboard.putNumber("amp_shooter", 100);
     }
 
     public Command setState(ShooterState _state) {
@@ -110,10 +106,10 @@ public class Shooter extends SubsystemBase{
             SmartDashboard.putString("SHOOTER_STATE", state.name());
             switch(state){
                 case START_HIGHT:
-                    currentShooterCommand = startShooter(5000);
+                    currentShooterCommand = startShooter(4400);
                     break;
                 case START_LOW:
-                    currentShooterCommand = startShooter(shooter_speed);
+                    currentShooterCommand = startShooter(2000);
                     break;
                 case STOP:
                     isReady = false;

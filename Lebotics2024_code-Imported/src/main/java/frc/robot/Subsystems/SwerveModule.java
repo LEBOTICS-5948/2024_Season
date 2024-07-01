@@ -69,7 +69,7 @@ public class SwerveModule{
 
         double kP_P, kP_I, kP_D, kP_Iz, kP_FF, kP_MaxOutput, kP_MinOutput;
         // PID coefficients kPosition
-        kP_P = 0.006; 
+        kP_P = 0.009; 
         kP_I = 0;
         kP_D = 0; 
         kP_Iz = 0; 
@@ -133,7 +133,7 @@ public class SwerveModule{
     }
 
     public SwerveModulePosition getModulePosition() {
-        return new SwerveModulePosition(driveEncoder.getPosition()*1.23, new Rotation2d(Math.toRadians(directionalEncoder.getAbsolutePosition()-90)));
+        return new SwerveModulePosition(driveEncoder.getPosition()*1.21, new Rotation2d(Math.toRadians(directionalEncoder.getAbsolutePosition()-90)));
         //driveEncoder.setPosition(0);
     }
 

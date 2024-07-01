@@ -2,6 +2,7 @@ package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -17,12 +18,12 @@ import frc.robot.Subsystems.Shooter.ShooterState;
 public class Robot extends TimedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-  private UsbCamera camera1;
+  //private UsbCamera camera1;
   
   @Override
   public void robotInit() {
     robotContainer = new RobotContainer();
-    camera1 = CameraServer.startAutomaticCapture(0);
+    //camera1 = CameraServer.startAutomaticCapture(0);
     addPeriodic(robotContainer.controlLoop(), 0.01, 0.005);
   } 
   
@@ -54,7 +55,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    
   }
 
   @Override

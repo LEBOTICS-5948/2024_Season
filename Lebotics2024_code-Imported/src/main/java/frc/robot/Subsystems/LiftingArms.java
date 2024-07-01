@@ -105,15 +105,15 @@ public class LiftingArms extends SubsystemBase{
 
     public Command retractArms(){
         return Commands.runOnce(() -> {
-            leftArmMotor.set(0.6);
-            rightArmMotor.set(-0.6);
+            leftArmMotor.set(1);
+            rightArmMotor.set(-1);
         },this);
     }
 
     public Command extendArms(){
         return Commands.runOnce(() -> {
-            leftArmMotor.set(-0.9);
-            rightArmMotor.set(0.9);
+            leftArmMotor.set(-1);
+            rightArmMotor.set(1);
         },this);
     }
 

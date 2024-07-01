@@ -2,15 +2,27 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.73,
-      "y": 4.48
+      "x": 1.8,
+      "y": 7.35
     },
-    "rotation": -60.0
+    "rotation": 90.0
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "startShooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.2
+          }
+        },
         {
           "type": "named",
           "data": {
@@ -20,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "r_right_top"
+            "pathName": "r_b"
           }
         },
         {
@@ -36,7 +48,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "r_right_top-1"
+                  "pathName": "r_b-1"
                 }
               },
               {
@@ -52,6 +64,12 @@
           "type": "named",
           "data": {
             "name": "shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "r_b_palante"
           }
         }
       ]

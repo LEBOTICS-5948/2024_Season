@@ -14,6 +14,18 @@
         {
           "type": "named",
           "data": {
+            "name": "startShooter"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.2
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "shoot"
           }
         },
@@ -57,7 +69,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "mr_top"
+            "pathName": "ml_girar"
           }
         },
         {
@@ -73,7 +85,44 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "mr_top-1"
+                  "pathName": "ml_girar-1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "retract"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "mr_girar"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "take"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "mr_girar-1"
                 }
               },
               {
