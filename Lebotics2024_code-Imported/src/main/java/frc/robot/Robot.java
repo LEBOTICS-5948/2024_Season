@@ -13,7 +13,6 @@ Libreria de prueba de errores para programadores.
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 Librerias siguientes a implementar.
-import edu.wpi.first.wpilibj.util.Color; // Control de las leds del robot.
 import edu.wpi.first.wpilibj.PowerDistribution; // Saber el estado de la bateria y comunicarle al driver si es necesario cambiarla.
 */
 
@@ -53,11 +52,6 @@ public class Robot extends TimedRobot {
     addPeriodic(robotContainer.controlLoop(), 0.01, 0.005);
     DriverStation.reportWarning("Robot iniciao correctamente", false);
     DataLogManager.log("Voltaje actual de la bateria: " + Voltaje);
-    /*
-      if (Voltaje < ) {
-        DriverStation.reportWarning("Bateria del robot baja!", true);
-      }
-    */
   } 
   
   @Override
