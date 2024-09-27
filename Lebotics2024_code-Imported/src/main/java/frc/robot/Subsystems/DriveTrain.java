@@ -49,10 +49,10 @@ public class DriveTrain extends SubsystemBase{
         STOP,
     }
 
-    private final SwerveModule sm_backLeft = new SwerveModule(1, 2, 3,false); // 1
-    private final SwerveModule sm_frontLeft = new SwerveModule(4, 5, 6,false); // 2
-    private final SwerveModule sm_frontRight = new SwerveModule(7, 8, 9,true); // 3
-    private final SwerveModule sm_backRight = new SwerveModule(10, 11, 12,true); // 4
+    private final SwerveModule sm_backLeft = new SwerveModule(7, 8, 3,false); // 1
+    private final SwerveModule sm_frontLeft = new SwerveModule(5, 6, 6,false); // 2
+    private final SwerveModule sm_frontRight = new SwerveModule(3, 4, 9,true); // 3
+    private final SwerveModule sm_backRight = new SwerveModule(1, 2, 12,true); // 4
 
     //    .---.         .---.
     //    | 2 |▩▩▩▩▩▩| 3 |
