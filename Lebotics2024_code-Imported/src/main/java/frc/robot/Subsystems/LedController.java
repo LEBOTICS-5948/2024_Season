@@ -13,13 +13,13 @@ public class LedController {
     int LedNums = 68; // Numero de leds en la tira utilizada.
 
     // Esto definira los valores de cada color en el PWM.
-    private final double STOPPED_PATTERN = -0.05;  // Ejemplo: color blanco sólido
-    private final double DEFFAULT_PATTERN = 0.25;  // Ejemplo: amarillo
-    private final double AUTOMONUS_BLUE_PATTERN = 0.87; // Ejemplo: azul
-    private final double AUTOMONUS_RED_PATTERN = 0.61;  // Ejemplo: rojo
-    private final double LOW_BATTERY_PATTERN = -0.11;   // Ejemplo: rojo oscuro
-    private final double TAKING_PATTERN = 0.77;         // Ejemplo: azul oscuro
-    private final double ERROR_PATTERN = 0.69;          // Ejemplo: amarillo intermitente
+    private final double STOPPED_PATTERN = -0.05;  // Ejemplo: color blanco pulsante
+    private final double DEFFAULT_PATTERN = 0.23;  // Ejemplo: amarillo pulsante
+    private final double AUTOMONUS_BLUE_PATTERN = 0.87; // Ejemplo: azul sólido
+    private final double AUTOMONUS_RED_PATTERN = 0.61;  // Ejemplo: rojo sólido
+    private final double LOW_BATTERY_PATTERN = -0.11;   // Ejemplo: rojo oscuro pulsante
+    private final double TAKING_PATTERN = 0.77;         // Ejemplo: verde sólido
+    private final double ERROR_PATTERN = 0.69;          // Ejemplo: amarillo sólido
     private final double OFF_PATTERN = -1.0;            // Apaga el Blinkin (negro)
 
     // TODO (Finish fire effect for the shooter.)
