@@ -1,12 +1,15 @@
 package frc.robot.Subsystems;
 
+// Libraries not used.
+//import com.revrobotics.RelativeEncoder;
+//import com.revrobotics.SparkMaxAlternateEncoder;
+//import com.revrobotics.CANSparkBase.ControlType;
+//import com.revrobotics.SparkMaxPIDController;
+//import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+
 import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxAlternateEncoder;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkBase.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,12 +49,13 @@ public class Intake extends SubsystemBase{
     private Intake(){
         loadedLimitSwitch = new DigitalInput(1);
         zeroArmLimitSwitch = new DigitalInput(9);
-        rollerMotor = new CANSparkMax(15, MotorType.kBrushless); // Puertos posibles (5, 4 o 3)
+        rollerMotor = new CANSparkMax(11, MotorType.kBrushless); 
         rollerMotor.restoreFactoryDefaults();
         rollerMotor.setIdleMode(IdleMode.kCoast);
 
-        double kP_P, kP_I, kP_D, kP_Iz, kP_FF, kP_MaxOutput, kP_MinOutput;
+        /*
         // PID coefficients kPosition
+        double kP_P, kP_I, kP_D, kP_Iz, kP_FF, kP_MaxOutput, kP_MinOutput;
         kP_P = 0.02; 
         kP_I = 0;
         kP_D = 0; 
@@ -59,6 +63,7 @@ public class Intake extends SubsystemBase{
         kP_FF = 0; 
         kP_MaxOutput = 1; 
         kP_MinOutput = -1;
+        */
 
         // set PID coefficients
         state = IntakeState.IDLE;
