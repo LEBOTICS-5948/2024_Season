@@ -1,17 +1,12 @@
 package frc.robot.Subsystems;
 
-// Libraries not used.
-//import com.revrobotics.RelativeEncoder;
-//import com.revrobotics.SparkMaxAlternateEncoder;
-//import com.revrobotics.CANSparkBase.ControlType;
-//import com.revrobotics.SparkMaxPIDController;
-//import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.Rev2mDistanceSensor;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.Rev2mDistanceSensor.Port;
 
-import edu.wpi.first.wpilibj.DigitalInput;
+//import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -19,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase{
     private static Intake m_instance = null;
+    private Rev2mDistanceSensor distOnboard;
 
     public static Intake getInstance() {
         if (m_instance == null) {
@@ -31,24 +27,22 @@ public class Intake extends SubsystemBase{
         IDLE,
         STOP,
         HOLD,
-        DOWN,
-        UP,
         AMP,
         SPEAKER,
     }
 
     private IntakeState state, lastState;
 
-    private final DigitalInput loadedLimitSwitch;
-    private final DigitalInput zeroArmLimitSwitch;
+    //private final DigitalInput loadedLimitSwitch;
+    //private final DigitalInput zeroArmLimitSwitch;
     private final CANSparkMax rollerMotor;
 
     public boolean isIntaking = false;
     public boolean isLoaded = false;
 
     private Intake(){
-        loadedLimitSwitch = new DigitalInput(1);
-        zeroArmLimitSwitch = new DigitalInput(9);
+        //zeroArmLimitSwitch = new DigitalInput(9);
+        distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
         rollerMotor = new CANSparkMax(11, MotorType.kBrushless); 
         rollerMotor.restoreFactoryDefaults();
         rollerMotor.setIdleMode(IdleMode.kCoast);
@@ -71,11 +65,15 @@ public class Intake extends SubsystemBase{
 
     @Override
     public void periodic(){
-        isLoaded = !loadedLimitSwitch.get();
-        if(isIntaking && isLoaded){ state = IntakeState.STOP; }
+        //if(isIntaking && isLoaded){ state = IntakeState.STOP; }
         runState();
+        if (distOnboard.getRange() < 6) {
+            isLoaded = true;
+        } else {
+            isLoaded = false;
+        }
         SmartDashboard.putBoolean("LS_ROLLER", isLoaded);
-        SmartDashboard.putBoolean("LS_ARM", zeroArmLimitSwitch.get());
+        //SmartDashboard.putBoolean("LS_ARM", zeroArmLimitSwitch.get());
         SmartDashboard.putBoolean("isIntaking", isIntaking);
     }
 

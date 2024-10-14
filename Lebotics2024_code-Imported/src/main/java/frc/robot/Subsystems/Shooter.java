@@ -28,8 +28,8 @@ public class Shooter extends SubsystemBase{
         STOP
     }
 
-    private final CANSparkMax r_ShooterMotor = new CANSparkMax(13, MotorType.kBrushless);
-    private final CANSparkMax l_ShooterMotor = new CANSparkMax(12, MotorType.kBrushless);
+    private final CANSparkMax r_ShooterMotor = new CANSparkMax(12, MotorType.kBrushless);
+    private final CANSparkMax l_ShooterMotor = new CANSparkMax(13, MotorType.kBrushless);
 
     private final RelativeEncoder r_ShooterEncoder;
     private final RelativeEncoder l_ShooterEncoder;
