@@ -11,11 +11,6 @@ import edu.wpi.first.hal.DriverStationJNI;
 import javax.xml.crypto.Data;
 import edu.wpi.first.util.datalog.DataLogReader;
 
-Despues
-import frc.robot.Subsystems.Functions.DistanceSensor;
-import edu.wpi.first.wpilibj.I2C;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
 Librerias siguientes a implementar.
 import edu.wpi.first.wpilibj.PowerDistribution; // Saber el estado de la bateria y comunicarle al driver si es necesario cambiarla.
 */
@@ -119,13 +114,13 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     if(distOnboard.isRangeValid()) {
-      SmartDashboard.putNumber("Range Onboard", distOnboard.getRange()); // Intake Sensor
-      SmartDashboard.putNumber("Timestamp Onboard", distOnboard.getTimestamp()); // Intake Sensor
+      SmartDashboard.putNumber("Intake Sensor", distOnboard.getRange()); // Intake Sensor (Onboard)
+      //SmartDashboard.putNumber("Timestamp Onboard", distOnboard.getTimestamp()); // Intake Sensor
     } 
 
     if(distMXP.isRangeValid()) {
-      SmartDashboard.putNumber("Range MXP", distMXP.getRange()); // Shooter Sensor
-      SmartDashboard.putNumber("Timestamp MXP", distMXP.getTimestamp()); // Shooter Sensor
+      SmartDashboard.putNumber("Shooter Sensor", distMXP.getRange()); // Shooter Sensor (MXP)
+      //SmartDashboard.putNumber("Timestamp MXP", distMXP.getTimestamp()); // Shooter Sensor
     }
   }
 

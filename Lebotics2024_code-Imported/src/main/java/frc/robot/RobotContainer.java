@@ -31,7 +31,6 @@ public class RobotContainer {
         NamedCommands.registerCommand("shoot", Commands.sequence(
             intake.setState(IntakeState.SPEAKER),
             Commands.waitSeconds(0.9)
-            
         ));
         NamedCommands.registerCommand("startShooter", Commands.sequence(
             shooter.setState(ShooterState.START_HIGHT)
@@ -41,7 +40,6 @@ public class RobotContainer {
         ));
         NamedCommands.registerCommand("take", Commands.sequence(
             shooter.setState(ShooterState.STOP),
-            intake.setState(IntakeState.DOWN),
             Commands.waitSeconds(0.5)
         ));
         NamedCommands.registerCommand("amp", Commands.sequence(
@@ -60,8 +58,7 @@ public class RobotContainer {
         }else{
             return Commands.sequence(
                 intake.setState(IntakeState.STOP),
-                Commands.waitSeconds(0.5),
-                intake.setState(IntakeState.UP)
+                Commands.waitSeconds(0.5)
             );
         }
     }
@@ -75,9 +72,9 @@ public class RobotContainer {
         );
 
         // Operator Conrols
-        operatorController.a().toggleOnTrue(intake.setState(IntakeState.DOWN));
+        //operatorController.a().toggleOnTrue(intake.setState(IntakeState.DOWN));
+        //operatorController.x().toggleOnTrue(intake.setState(IntakeState.UP));
         operatorController.b().toggleOnTrue(intake.setState(IntakeState.STOP));
-        operatorController.x().toggleOnTrue(intake.setState(IntakeState.UP));
         operatorController.y().toggleOnTrue(intake.setState(IntakeState.AMP));  
 
         /* operatorController.leftBumper()
@@ -88,7 +85,6 @@ public class RobotContainer {
             .toggleOnFalse(shooter.setState(ShooterState.STOP));
         (operatorController.rightTrigger().and(() -> shooter.isReady && !intake.isIntaking))
             .toggleOnTrue(intake.setState(IntakeState.SPEAKER));
-
         operatorController.povUp()
             .toggleOnTrue(liftingArms.setState(LiftingArmsState.UP))
             .toggleOnFalse(liftingArms.setState(LiftingArmsState.STOP));
