@@ -2,9 +2,10 @@ package frc.robot.Subsystems;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+//import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,20 +28,20 @@ public class Shooter extends SubsystemBase{
         STOP
     }
 
-    private final CANSparkMax r_ShooterMotor = new CANSparkMax(17, MotorType.kBrushless);
-    private final CANSparkMax l_ShooterMotor = new CANSparkMax(18, MotorType.kBrushless);
+    private final CANSparkMax r_ShooterMotor = new CANSparkMax(13, MotorType.kBrushless);
+    private final CANSparkMax l_ShooterMotor = new CANSparkMax(12, MotorType.kBrushless);
 
     private final RelativeEncoder r_ShooterEncoder;
     private final RelativeEncoder l_ShooterEncoder;
 
-    private final SparkMaxPIDController r_PIDController;
-    private final SparkMaxPIDController l_PIDController;
+    private final SparkPIDController r_PIDController;
+    private final SparkPIDController l_PIDController;
 
     private ShooterState state, lastState;
 
     public boolean isReady = false;
 
-    private double targetRPM, shooter_speed;
+    private double targetRPM; //shooter_speed
 
     @Override
     public void periodic(){

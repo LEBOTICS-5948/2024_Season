@@ -75,19 +75,16 @@ public class RobotContainer {
         );
 
         // Operator Conrols
-        operatorController.a().toggleOnTrue(intake.setState(IntakeState.DOWN));
+        /* operatorController.a().toggleOnTrue(intake.setState(IntakeState.DOWN));
         operatorController.b().toggleOnTrue(intake.setState(IntakeState.STOP));
         operatorController.x().toggleOnTrue(intake.setState(IntakeState.UP));
         operatorController.y().toggleOnTrue(intake.setState(IntakeState.AMP));  
 
-        /* operatorController.leftBumper()
-            .toggleOnTrue(shooter.setState(ShooterState.START_LOW))
-            .toggleOnFalse(shooter.setState(ShooterState.STOP)); */
         operatorController.leftTrigger()
             .toggleOnTrue(shooter.setState(ShooterState.START_HIGHT))
             .toggleOnFalse(shooter.setState(ShooterState.STOP));
         (operatorController.rightTrigger().and(() -> shooter.isReady && !intake.isIntaking))
-            .toggleOnTrue(intake.setState(IntakeState.SPEAKER));
+            .toggleOnTrue(intake.setState(IntakeState.SPEAKER)); */
 
         operatorController.povUp()
             .toggleOnTrue(liftingArms.setState(LiftingArmsState.UP))
