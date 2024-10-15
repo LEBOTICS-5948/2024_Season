@@ -28,13 +28,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer(){
-        NamedCommands.registerCommand("shoot", Commands.sequence(
-            intake.setState(IntakeState.SPEAKER),
-            Commands.waitSeconds(0.9)
-        ));
-        NamedCommands.registerCommand("startShooter", Commands.sequence(
-            shooter.setState(ShooterState.START_HIGHT)
-        ));
+        
         NamedCommands.registerCommand("stopShooter", Commands.sequence(
             shooter.setState(ShooterState.STOP)
         ));
@@ -42,11 +36,7 @@ public class RobotContainer {
             shooter.setState(ShooterState.STOP),
             Commands.waitSeconds(0.5)
         ));
-        NamedCommands.registerCommand("amp", Commands.sequence(
-            intake.setState(IntakeState.AMP),
-            Commands.waitSeconds(0.5)
-        ));
-        NamedCommands.registerCommand("retract", Commands.waitSeconds(0.5).andThen(shooter.setState(ShooterState.START_HIGHT)).andThen(retractifneeded()));
+        
         configureBindings();
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Mode", autoChooser);  
@@ -72,19 +62,21 @@ public class RobotContainer {
         );
 
         // Operator Conrols
-        //operatorController.a().toggleOnTrue(intake.setState(IntakeState.DOWN));
-        //operatorController.x().toggleOnTrue(intake.setState(IntakeState.UP));
-        operatorController.b().toggleOnTrue(intake.setState(IntakeState.STOP));
-        operatorController.y().toggleOnTrue(intake.setState(IntakeState.AMP));  
-
-        /* operatorController.leftBumper()
-            .toggleOnTrue(shooter.setState(ShooterState.START_LOW))
-            .toggleOnFalse(shooter.setState(ShooterState.STOP)); */
-        operatorController.leftTrigger()
+        operatorController.a()
+            .toggleOnTrue(intake.setState(IntakeState.IN))
+            .toggleOnFalse(intake.setState(IntakeState.STOP));
+        operatorController.b()
+            .toggleOnTrue(intake.setState(IntakeState.OUT))
+            .toggleOnFalse(intake.setState(IntakeState.STOP));
+        operatorController.x().toggleOnTrue(shooter.setState(ShooterState.LOAD));
+        operatorController.y().toggleOnTrue(intake.setState(IntakeState.STOP));
+        
+        /* operatorController.leftTrigger()
             .toggleOnTrue(shooter.setState(ShooterState.START_HIGHT))
             .toggleOnFalse(shooter.setState(ShooterState.STOP));
         (operatorController.rightTrigger().and(() -> shooter.isReady && !intake.isIntaking))
-            .toggleOnTrue(intake.setState(IntakeState.SPEAKER));
+            .toggleOnTrue(intake.setState(IntakeState.SPEAKER)); */
+        
         operatorController.povUp()
             .toggleOnTrue(liftingArms.setState(LiftingArmsState.UP))
             .toggleOnFalse(liftingArms.setState(LiftingArmsState.STOP));

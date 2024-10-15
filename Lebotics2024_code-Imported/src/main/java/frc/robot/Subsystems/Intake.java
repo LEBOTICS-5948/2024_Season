@@ -24,56 +24,38 @@ public class Intake extends SubsystemBase{
     }
 
     public enum IntakeState {
-        IDLE,
         STOP,
-        HOLD,
-        AMP,
-        SPEAKER,
+        IN,
+        OUT,
+        TAKE,
     }
 
     private IntakeState state, lastState;
 
-    //private final DigitalInput loadedLimitSwitch;
-    //private final DigitalInput zeroArmLimitSwitch;
     private final CANSparkMax rollerMotor;
 
     public boolean isIntaking = false;
     public boolean isLoaded = false;
 
     private Intake(){
-        //zeroArmLimitSwitch = new DigitalInput(9);
         distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
         rollerMotor = new CANSparkMax(11, MotorType.kBrushless); 
         rollerMotor.restoreFactoryDefaults();
         rollerMotor.setIdleMode(IdleMode.kCoast);
-
-        /*
-        // PID coefficients kPosition
-        double kP_P, kP_I, kP_D, kP_Iz, kP_FF, kP_MaxOutput, kP_MinOutput;
-        kP_P = 0.02; 
-        kP_I = 0;
-        kP_D = 0; 
-        kP_Iz = 0; 
-        kP_FF = 0; 
-        kP_MaxOutput = 1; 
-        kP_MinOutput = -1;
-        */
-
-        // set PID coefficients
-        state = IntakeState.IDLE;
+        // set initial state
+        state = IntakeState.STOP;
     }
 
     @Override
     public void periodic(){
         //if(isIntaking && isLoaded){ state = IntakeState.STOP; }
         runState();
-        if (distOnboard.getRange() < 6) {
+        if (distOnboard.getRange() < 10) {
             isLoaded = true;
         } else {
             isLoaded = false;
         }
-        SmartDashboard.putBoolean("LS_ROLLER", isLoaded);
-        //SmartDashboard.putBoolean("LS_ARM", zeroArmLimitSwitch.get());
+        SmartDashboard.putBoolean("INTAKE", isLoaded);
         SmartDashboard.putBoolean("isIntaking", isIntaking);
     }
 
@@ -90,23 +72,20 @@ public class Intake extends SubsystemBase{
         if(!state.equals(lastState)){
             SmartDashboard.putString("INTAKE_STATE", state.name());
             switch(state){
-                case IDLE:
-                    isIntaking = false;
-                    currentIntakeCommand = idle_take();
-                    break;
                 case STOP:
-                    currentIntakeCommand = stop_take().finallyDo((i) -> isIntaking = false);
+                    currentIntakeCommand = STOP_take().finallyDo((i) -> isIntaking = false);
                     break;
-                case HOLD:
-                    currentIntakeCommand = hold_take().finallyDo((i) -> isIntaking = false);
+                case IN:
+                    isIntaking = true;
+                    currentIntakeCommand = IN_take();
                     break;
-                case AMP:
+                case OUT:
+                    isIntaking = true;
+                    currentIntakeCommand = OUT_take();
+                    break;
+                case TAKE:
                     isIntaking = false;
-                    currentIntakeCommand = amp_take();
-                    break;
-                case SPEAKER:
-                    isIntaking = false;
-                    currentIntakeCommand = speaker_take();
+                    currentIntakeCommand = TAKE_take();
                     break;
                 default:
                     state = IntakeState.STOP;
@@ -121,36 +100,26 @@ public class Intake extends SubsystemBase{
         }
     }
 
-    private Command idle_take(){
-        return Commands.runOnce(() -> {
-            rollerMotor.disable();
-        },this);
+    private Command IN_take(){
+        return Commands.sequence(
+            Commands.runOnce(() -> rollerMotor.set(0.8))
+        );
     }
 
-    private Command stop_take(){
+    private Command OUT_take(){
+        return Commands.sequence(
+            Commands.runOnce(() -> rollerMotor.set(-0.8))
+        );
+    }
+
+    private Command STOP_take(){
         return Commands.sequence(
             Commands.runOnce(() -> rollerMotor.stopMotor())
         );
     }
-    private Command hold_take(){
+    private Command TAKE_take(){
         return Commands.sequence(
             Commands.runOnce(() -> rollerMotor.set(-0.08))
-        );
-    }
-
-    private Command amp_take(){
-        return Commands.sequence(
-            rollers(-0.06),
-            Commands.waitSeconds(0.2),rollers(0.9),
-            Commands.waitSeconds(0.4),setState(IntakeState.STOP)
-        );
-    }
-
-    private Command speaker_take(){
-        return Commands.sequence(
-            rollers(1),
-            Commands.waitSeconds(1),
-            setState(IntakeState.STOP)
         );
     }
 

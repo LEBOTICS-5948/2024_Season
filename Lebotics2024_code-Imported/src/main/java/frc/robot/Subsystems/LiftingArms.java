@@ -52,13 +52,13 @@ public class LiftingArms extends SubsystemBase{
 
         leftArmMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kForward, true);
         leftArmMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, true);
-        leftArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, 0);
-        leftArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, -LiftingArmsConstants.SoftLimit);
+        leftArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, LiftingArmsConstants.SoftLimit);
+        leftArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, 0);
 
         rightArmMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kForward, true);
         rightArmMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, true);
-        rightArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, LiftingArmsConstants.SoftLimit);
-        rightArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, 0); 
+        rightArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, 0);
+        rightArmMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, -LiftingArmsConstants.SoftLimit); 
 
         state = LiftingArmsState.STOP;
         
@@ -106,15 +106,15 @@ public class LiftingArms extends SubsystemBase{
 
     public Command retractArms(){
         return Commands.runOnce(() -> {
-            leftArmMotor.set(1);
-            rightArmMotor.set(-1);
+            leftArmMotor.set(-1);
+            rightArmMotor.set(1);
         },this);
     }
 
     public Command extendArms(){
         return Commands.runOnce(() -> {
-            leftArmMotor.set(-1);
-            rightArmMotor.set(1);
+            leftArmMotor.set(1);
+            rightArmMotor.set(-1);
         },this);
     }
 

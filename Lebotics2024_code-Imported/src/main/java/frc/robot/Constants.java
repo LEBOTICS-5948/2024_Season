@@ -23,7 +23,7 @@ public class Constants {
     public static class LiftingArmsConstants{
         public static final int LeftArmID = 14;
         public static final int RightArmID = 15;
-        public static final float SoftLimit = 93.5f;
+        public static final float SoftLimit = 110f;
     }
 
 }
