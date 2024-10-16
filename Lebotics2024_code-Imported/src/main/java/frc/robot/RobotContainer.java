@@ -62,20 +62,31 @@ public class RobotContainer {
         );
 
         // Operator Conrols
+        operatorController.a().and(() -> !shooter.isLoaded)
+            .toggleOnTrue(intake.setState(IntakeState.IN)
+            .alongWith(shooter.setState(ShooterState.LOAD))
+        );
+        operatorController.a().and(() -> shooter.isLoaded)
+            .toggleOnTrue(intake.setState(IntakeState.STOP)
+            .alongWith(shooter.setState(ShooterState.STOP))
+        );
         operatorController.a()
-            .toggleOnTrue(intake.setState(IntakeState.IN))
-            .toggleOnFalse(intake.setState(IntakeState.STOP));
+            .toggleOnFalse(intake.setState(IntakeState.STOP)
+            .alongWith(shooter.setState(ShooterState.STOP))
+        );
         operatorController.b()
             .toggleOnTrue(intake.setState(IntakeState.OUT))
             .toggleOnFalse(intake.setState(IntakeState.STOP));
-        operatorController.x().toggleOnTrue(shooter.setState(ShooterState.LOAD));
+        //operatorController.x().toggleOnTrue(shooter.setState(ShooterState.LOAD));
         operatorController.y().toggleOnTrue(intake.setState(IntakeState.STOP));
         
-        /* operatorController.leftTrigger()
-            .toggleOnTrue(shooter.setState(ShooterState.START_HIGHT))
+        operatorController.leftTrigger()
+            .toggleOnTrue(shooter.setState(ShooterState.AIM))
             .toggleOnFalse(shooter.setState(ShooterState.STOP));
-        (operatorController.rightTrigger().and(() -> shooter.isReady && !intake.isIntaking))
-            .toggleOnTrue(intake.setState(IntakeState.SPEAKER)); */
+        (operatorController.rightTrigger().and(() -> shooter.isReady))
+            .toggleOnTrue(shooter.setState(ShooterState.SHOOT)
+            .alongWith(intake.setState(IntakeState.IN))
+        );
         
         operatorController.povUp()
             .toggleOnTrue(liftingArms.setState(LiftingArmsState.UP))

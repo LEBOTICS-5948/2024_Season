@@ -16,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Intake.IntakeState;
 
+import frc.robot.Subsystems.Intake.IntakeState;
+
 public class Shooter extends SubsystemBase{
     private static Shooter m_instance = null;
 
@@ -33,8 +35,7 @@ public class Shooter extends SubsystemBase{
         AIMBOT,
         AIM,
         STOP,
-        UP,
-        DOWN
+        HOLD,
     }
 
     private final CANSparkMax r_ShooterMotor = new CANSparkMax(12, MotorType.kBrushless);
@@ -52,6 +53,8 @@ public class Shooter extends SubsystemBase{
     private final SparkPIDController r_PIDController;
     private final SparkPIDController l_PIDController;
 
+    private final Intake intake = Intake.getInstance();
+
     private ShooterState state, lastState;
 
     public boolean isReady, isLoaded = false;
@@ -62,11 +65,16 @@ public class Shooter extends SubsystemBase{
 
     @Override
     public void periodic(){
-        runState();
-        /* if((!state.equals(ShooterState.STOP)) && r_ShooterEncoder.getVelocity()>targetRPM){
+        if((state.equals(ShooterState.LOAD)) && isLoaded){
+            state = ShooterState.STOP;
+        }
+        if((state.equals(ShooterState.AIM)) && isLoaded){
             isReady = true;
-        } */
-        if (distMXP.getRange() < 10) {
+        }else{
+            isReady = false;
+        }
+        runState();
+        if (distMXP.getRange() < 8) {
             isLoaded = true;
         } else {
             isLoaded = false;
@@ -80,8 +88,11 @@ public class Shooter extends SubsystemBase{
 
     private Shooter(){
         distMXP = new Rev2mDistanceSensor(Port.kMXP);
-
-        r_ShooterMotor.setInverted(true);
+        l_ShooterMotor.restoreFactoryDefaults();
+        r_ShooterMotor.restoreFactoryDefaults();
+        l_ShooterMotor.setInverted(true);
+        r_ShooterMotor.setIdleMode(IdleMode.kCoast);
+        l_ShooterMotor.setIdleMode(IdleMode.kCoast);
         r_ShooterMotor.setClosedLoopRampRate(0.5);
         l_ShooterMotor.setClosedLoopRampRate(0.5);
         r_ShooterEncoder = r_ShooterMotor.getEncoder();
@@ -95,6 +106,9 @@ public class Shooter extends SubsystemBase{
         angleMotor2.follow(angleMotor1);
         angleEncoder = angleMotor1.getAlternateEncoder(SparkMaxAlternateEncoder.Type.kQuadrature, 8192);
         angleEncoder.setPositionConversionFactor(360);
+
+        FeederMotor.restoreFactoryDefaults();
+        FeederMotor.setIdleMode(IdleMode.kBrake);
 
         anglePIDController = angleMotor1.getPIDController();
         anglePIDController.setFeedbackDevice(angleEncoder);
@@ -157,24 +171,18 @@ public class Shooter extends SubsystemBase{
         if(!state.equals(lastState)){
             SmartDashboard.putString("SHOOTER_STATE", state.name());
             switch(state){
-                case UP:
-                    currentShooterCommand = UP();
-                    break;
-                case DOWN:
-                    currentShooterCommand = DOWN();
-                    break;
-                case START:
-                    currentShooterCommand = STOP();
+                case SHOOT:
+                    currentShooterCommand = launchShooter();
                     break;
                 case AIM:
-                    currentShooterCommand = STOP();
+                    currentShooterCommand = prepareShooter();
                     break;
                 case LOAD:
-                    currentShooterCommand = pivot(50);
+                    currentShooterCommand = loadShooter();
                     break;
                 case STOP:
                     isReady = false;
-                    currentShooterCommand = STOP();
+                    currentShooterCommand = setShooterNeutral();
                     break;
                 default:
                     isReady = false;
@@ -200,37 +208,54 @@ public class Shooter extends SubsystemBase{
 
     private Command setShooterAngle(){
         return Commands.runOnce(() -> {
-            pivot(50);
+            pivot(40);
         }, this);
     }
 
-    private Command UP(){
+    private Command loadShooter(){
+        return Commands.sequence(
+            Commands.runOnce(() -> FeederMotor.set(0.8)),
+            pivot(40)
+        );
+    }
+
+    private Command setShooterNeutral(){
+        return Commands.sequence(
+            stopShooterWheels(),
+            Commands.runOnce(() -> FeederMotor.stopMotor()),
+            pivot(40)
+        );
+    }
+
+    private Command launchShooter(){
+        return Commands.sequence(
+            startShooterWheels(6000, 6000),
+            Commands.runOnce(() -> FeederMotor.set(1)),
+            pivot(60),
+            Commands.waitSeconds(3),
+            setShooterNeutral(),
+            Commands.runOnce(() -> FeederMotor.stopMotor()),
+            Commands.runOnce(() -> intake.setState(IntakeState.STOP)),
+            Commands.runOnce(() -> state = ShooterState.STOP)
+        );
+    }
+
+    private Command prepareShooter(){
+        return Commands.sequence(
+            Commands.runOnce(() -> FeederMotor.stopMotor()),
+            pivot(60),
+            startShooterWheels(6000, 6000)
+        );
+    }
+
+    private Command startShooterWheels(double left_rpm, double right_rpm){
         return Commands.runOnce(() -> {
-            angleMotor1.set(0.2);
+            l_PIDController.setReference(left_rpm , ControlType.kVelocity);
+            r_PIDController.setReference(right_rpm , ControlType.kVelocity);
         }, this);
     }
 
-    private Command DOWN(){
-        return Commands.runOnce(() -> {
-            angleMotor1.set(-0.2);
-        }, this);
-    }
-
-    private Command STOP(){
-        return Commands.runOnce(() -> {
-            angleMotor1.stopMotor();
-        }, this);
-    }
-
-    private Command startShooter(double speed){
-        return Commands.runOnce(() -> {
-            targetRPM = speed-100;
-            r_PIDController.setReference(speed , ControlType.kVelocity);
-            l_PIDController.setReference(speed , ControlType.kVelocity);
-        }, this);
-    }
-
-    private Command stopShooter(){
+    private Command stopShooterWheels(){
         return Commands.runOnce(() -> {
             r_ShooterMotor.disable();
             l_ShooterMotor.disable();
