@@ -16,8 +16,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Subsystems.Intake.IntakeState;
 
-import frc.robot.Subsystems.Intake.IntakeState;
-
 public class Shooter extends SubsystemBase{
     private static Shooter m_instance = null;
 
@@ -61,7 +59,7 @@ public class Shooter extends SubsystemBase{
 
     private Rev2mDistanceSensor distMXP;
 
-    private double targetRPM; //shooter_speed
+    //private double targetRPM; //shooter_speed
 
     @Override
     public void periodic(){
@@ -229,8 +227,9 @@ public class Shooter extends SubsystemBase{
 
     private Command launchShooter(){
         return Commands.sequence(
-            startShooterWheels(6000, 6000),
+            startShooterWheels(5000, 5000),
             Commands.runOnce(() -> FeederMotor.set(1)),
+            //Commands.runOnce(() -> intake.setState(IntakeState.IN)),
             pivot(60),
             Commands.waitSeconds(3),
             setShooterNeutral(),
@@ -244,7 +243,7 @@ public class Shooter extends SubsystemBase{
         return Commands.sequence(
             Commands.runOnce(() -> FeederMotor.stopMotor()),
             pivot(60),
-            startShooterWheels(6000, 6000)
+            startShooterWheels(5000, 5000)
         );
     }
 

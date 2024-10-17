@@ -67,8 +67,8 @@ public class RobotContainer {
             .alongWith(shooter.setState(ShooterState.LOAD))
         );
         operatorController.a().and(() -> shooter.isLoaded)
-            .toggleOnTrue(intake.setState(IntakeState.STOP)
-            .alongWith(shooter.setState(ShooterState.STOP))
+            .toggleOnTrue(shooter.setState(ShooterState.STOP)
+            //.toggleOnTrue(intake.setState(IntakeState.STOP)
         );
         operatorController.a()
             .toggleOnFalse(intake.setState(IntakeState.STOP)
@@ -85,7 +85,6 @@ public class RobotContainer {
             .toggleOnFalse(shooter.setState(ShooterState.STOP));
         (operatorController.rightTrigger().and(() -> shooter.isReady))
             .toggleOnTrue(shooter.setState(ShooterState.SHOOT)
-            .alongWith(intake.setState(IntakeState.IN))
         );
         
         operatorController.povUp()
