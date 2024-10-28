@@ -70,8 +70,9 @@ public class DriveTrain extends SubsystemBase{
     private final SwerveDriveKinematics m_kinematics = SwerveConstants.Kinematics;
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
     private Field2d field = new Field2d();
+    private Pose2d RobotPose2d;
+    private Double yawAdjustment = 0d;
     private SwerveDriveOdometry m_odometry;
-    private Pose2d pose;
 
     private DoubleSupplier translationX, translationY, rotationOmega, omegaOverride;
 
@@ -85,41 +86,45 @@ public class DriveTrain extends SubsystemBase{
 
     private DriveTrain() {
         gyro.reset();
-        pose = new Pose2d();
+        SmartDashboard.putData("Field", field);
         m_odometry = new SwerveDriveOdometry(
             m_kinematics, gyro.getRotation2d(),
-            getSwerveModulePositions(), new Pose2d(0, 0, new Rotation2d()));
-
-            AutoBuilder.configureHolonomic(
-                this::getPose, // Robot pose supplier
-                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
-                new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
-                        new PIDConstants(4, 0.0, 0.0), // Translation PID constants
-                        new PIDConstants(1, 0.0, 0.0), // Rotation PID constants
-                        SwerveConstants.DriveMaxSpeed, // Max module speed, in m/s
-                        0.34, // Drive base radius in meters. Distance from robot center to furthest module.
-                        new ReplanningConfig() // Default path replanning config. See the API for the options here
-                ),
-                () -> {
-                  // Boolean supplier that controls when the path will be mirrored for the red alliance
-                  // This will flip the path being followed to the red side of the field.
-                  // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-    
-                  var alliance = DriverStation.getAlliance();
-                  if (alliance.isPresent()) {
-                    return alliance.equals(DriverStation.Alliance.Red);
-                  }
-                  return false;
-                },
-                this // Reference to this subsystem to set requirements
+            getSwerveModulePositions(), new Pose2d(0, 0, new Rotation2d())
         );
 
-        SmartDashboard.putData(field);
+        AutoBuilder.configureHolonomic(
+            this::getPose, // Robot pose supplier
+            this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            this::driveRobotRelative, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds
+            new HolonomicPathFollowerConfig( // HolonomicPathFollowerConfig, this should likely live in your Constants class
+                    new PIDConstants(4, 0.0, 0.0), // Translation PID constants
+                    new PIDConstants(1, 0.0, 0.0), // Rotation PID constants
+                    SwerveConstants.DriveMaxSpeed, // Max module speed, in m/s
+                    0.34, // Drive base radius in meters. Distance from robot center to furthest module.
+                    new ReplanningConfig() // Default path replanning config. See the API for the options here
+            ),
+            () -> {
+                // Boolean supplier that controls when the path will be mirrored for the red alliance
+                // This will flip the path being followed to the red side of the field.
+                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                var alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                    return alliance.equals(DriverStation.Alliance.Red);
+                }
+                return false;
+            },
+            this // Reference to this subsystem to set requirements
+        );
         SmartDashboard.putBoolean("FieldRelativeTeleop", FieldRelativeTeleop);
         SmartDashboard.putNumber("DeadBand_Drift", DEADBAND);
     }
+
+    /* public double getRobotAtjustedRotation() {
+        yawAdjustment = 
+        angle = 
+    } */
 
     public Pose2d getPose() {
         return m_odometry.getPoseMeters();
@@ -127,6 +132,11 @@ public class DriveTrain extends SubsystemBase{
 
     public void resetPose(Pose2d p) {
         m_odometry.resetPosition(gyro.getRotation2d(), getSwerveModulePositions(), p);
+    }
+
+    public void updateOdometry(Pose2d pose) {
+        RobotPose2d = pose;
+        field.setRobotPose(RobotPose2d);
     }
 
     public ChassisSpeeds getSpeeds() {
@@ -166,10 +176,7 @@ public class DriveTrain extends SubsystemBase{
             SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(chassisSpeeds);
             setModuleStates(swerveModuleStates);
         }
-        pose = m_odometry.update(gyro.getRotation2d(), getSwerveModulePositions());
-        field.setRobotPose(pose);
-        SmartDashboard.putNumber("pose_x", pose.getX());
-        SmartDashboard.putNumber("pose_y", pose.getY());
+
     }
 
     private SwerveModulePosition[] getSwerveModulePositions() {

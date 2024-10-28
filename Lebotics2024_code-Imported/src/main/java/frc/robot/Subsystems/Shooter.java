@@ -213,7 +213,7 @@ public class Shooter extends SubsystemBase{
     private Command loadShooter(){
         return Commands.sequence(
             Commands.runOnce(() -> FeederMotor.set(0.8)),
-            pivot(40)
+            pivot(0)
         );
     }
 
@@ -221,7 +221,7 @@ public class Shooter extends SubsystemBase{
         return Commands.sequence(
             stopShooterWheels(),
             Commands.runOnce(() -> FeederMotor.stopMotor()),
-            pivot(40)
+            pivot(0)
         );
     }
 
@@ -230,7 +230,7 @@ public class Shooter extends SubsystemBase{
             startShooterWheels(5000, 5000),
             Commands.runOnce(() -> FeederMotor.set(1)),
             //Commands.runOnce(() -> intake.setState(IntakeState.IN)),
-            pivot(60),
+            pivot(20),
             Commands.waitSeconds(3),
             setShooterNeutral(),
             Commands.runOnce(() -> FeederMotor.stopMotor()),
@@ -242,7 +242,7 @@ public class Shooter extends SubsystemBase{
     private Command prepareShooter(){
         return Commands.sequence(
             Commands.runOnce(() -> FeederMotor.stopMotor()),
-            pivot(60),
+            pivot(20),
             startShooterWheels(5000, 5000)
         );
     }

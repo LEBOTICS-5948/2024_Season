@@ -35,6 +35,7 @@ import frc.robot.Subsystems.Intake.IntakeState;
 import frc.robot.Subsystems.LiftingArms.LiftingArmsState;
 import frc.robot.Subsystems.Shooter.ShooterState;
 import frc.robot.Subsystems.LedController;
+import frc.robot.Subsystems.Limelight.Limelight;
 
 public class Robot extends TimedRobot {
   private Command autonomousCommand;
@@ -43,15 +44,19 @@ public class Robot extends TimedRobot {
 
   private Rev2mDistanceSensor distOnboard; 
   private Rev2mDistanceSensor distMXP;
+
+  private Limelight limelight;
   //private UsbCamera camera1;
   
   @Override
   public void robotInit() {
+    limelight = new Limelight();
     //camera1 = CameraServer.startAutomaticCapture(0);
     ledController = new LedController(); // Nueva instancia para controlar las leds.
     robotContainer = new RobotContainer();
     distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
     distMXP = new Rev2mDistanceSensor(Port.kMXP);
+    distOnboard.setAutomaticMode(true);
 
     double Voltaje = RobotController.getBatteryVoltage();
     DataLogManager.start();
@@ -104,7 +109,6 @@ public class Robot extends TimedRobot {
       //DataLogManager.log("");
     }
     //DataLogManager.log("Teleop Iniciado.");
-    distOnboard.setAutomaticMode(true);
     DriveTrain.getInstance().setState(DriveTrainState.JOYSTICKS).schedule();
     Intake.getInstance().setState(IntakeState.STOP).schedule();
     Shooter.getInstance().setState(ShooterState.STOP).schedule();
@@ -134,7 +138,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
-    distOnboard.setAutomaticMode(false);
+    //distOnboard.setAutomaticMode(false);
     DataLogManager.log("Robot deshabilitado." + Timer.getFPGATimestamp());
   }
 
