@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.revrobotics.Rev2mDistanceSensor;
+import com.revrobotics.Rev2mDistanceSensor.Port;
 
 // Recomiendo mantener estas funciones declaradas para disminuir la memoria que se destina en el robot.
 /* 
@@ -15,7 +16,7 @@ Librerias siguientes a implementar.
 import edu.wpi.first.wpilibj.PowerDistribution; // Saber el estado de la bateria y comunicarle al driver si es necesario cambiarla.
 */
 
-import com.revrobotics.Rev2mDistanceSensor.Port;
+
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
@@ -40,7 +41,6 @@ import frc.robot.Subsystems.Vision.Limelight;
 public class Robot extends TimedRobot {
   private Command autonomousCommand;
   private RobotContainer robotContainer;
-  private LedController ledController;
 
   private Rev2mDistanceSensor distOnboard; 
   private Rev2mDistanceSensor distMXP;
@@ -52,7 +52,6 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     limelight = Limelight.getInstance(DriveTrain.getInstance());
     //camera1 = CameraServer.startAutomaticCapture(0);
-    ledController = new LedController(); // Nueva instancia para controlar las leds.
     robotContainer = new RobotContainer();
     distOnboard = new Rev2mDistanceSensor(Port.kOnboard);
     distMXP = new Rev2mDistanceSensor(Port.kMXP);
@@ -69,7 +68,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic(){
     CommandScheduler.getInstance().run();
-    ledController.LedsFuncionar();
     DriveTrain.getInstance().setAngleToTarget(limelight.angloToTarget());
     Shooter.getInstance().setShooterAngle(limelight.getShooterAngle());
     /* 
@@ -107,13 +105,11 @@ public class Robot extends TimedRobot {
   public void teleopInit(){
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
-    } else {
-      //DataLogManager.log("");
     }
     //DataLogManager.log("Teleop Iniciado.");
     DriveTrain.getInstance().setState(DriveTrainState.JOYSTICKS).schedule();
-    Intake.getInstance().setState(IntakeState.STOP).schedule();
-    Shooter.getInstance().setState(ShooterState.STOP).schedule();
+    /* Intake.getInstance().setState(IntakeState.STOP).schedule();
+    Shooter.getInstance().setState(ShooterState.STOP).schedule(); */
     LiftingArms.getInstance().setState(LiftingArmsState.STOP).schedule();
   }
 
@@ -124,8 +120,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopExit(){
     DriveTrain.getInstance().setState(DriveTrainState.IDLE).schedule();
-    Intake.getInstance().setState(IntakeState.STOP).schedule();
-    Shooter.getInstance().setState(ShooterState.STOP).schedule();
+    /* Intake.getInstance().setState(IntakeState.STOP).schedule();
+    Shooter.getInstance().setState(ShooterState.STOP).schedule(); */
     LiftingArms.getInstance().setState(LiftingArmsState.STOP).schedule();
   }
 
