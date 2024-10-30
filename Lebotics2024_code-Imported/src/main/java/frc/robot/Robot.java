@@ -35,7 +35,7 @@ import frc.robot.Subsystems.Intake.IntakeState;
 import frc.robot.Subsystems.LiftingArms.LiftingArmsState;
 import frc.robot.Subsystems.Shooter.ShooterState;
 import frc.robot.Subsystems.LedController;
-import frc.robot.Subsystems.Limelight.Limelight;
+import frc.robot.Subsystems.Vision.Limelight;
 
 public class Robot extends TimedRobot {
   private Command autonomousCommand;
@@ -50,7 +50,7 @@ public class Robot extends TimedRobot {
   
   @Override
   public void robotInit() {
-    limelight = new Limelight();
+    limelight = Limelight.getInstance(DriveTrain.getInstance());
     //camera1 = CameraServer.startAutomaticCapture(0);
     ledController = new LedController(); // Nueva instancia para controlar las leds.
     robotContainer = new RobotContainer();
@@ -70,6 +70,8 @@ public class Robot extends TimedRobot {
   public void robotPeriodic(){
     CommandScheduler.getInstance().run();
     ledController.LedsFuncionar();
+    DriveTrain.getInstance().setAngleToTarget(limelight.angloToTarget());
+    Shooter.getInstance().setShooterAngle(limelight.getShooterAngle());
     /* 
     Esto sera implementado a futuro y seran errores al iniciar el robot. (Ejemplo: Saber si las conexiones de los Swerves estan bien hechas.)
     try {
@@ -117,15 +119,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    if(distOnboard.isRangeValid()) {
-      SmartDashboard.putNumber("Intake Sensor", distOnboard.getRange()); // Intake Sensor (Onboard)
-      //SmartDashboard.putNumber("Timestamp Onboard", distOnboard.getTimestamp()); // Intake Sensor
-    } 
-
-    if(distMXP.isRangeValid()) {
-      SmartDashboard.putNumber("Shooter Sensor", distMXP.getRange()); // Shooter Sensor (MXP)
-      //SmartDashboard.putNumber("Timestamp MXP", distMXP.getTimestamp()); // Shooter Sensor
-    }
   }
 
   @Override
@@ -149,6 +142,5 @@ public class Robot extends TimedRobot {
 
   @Override
   public void testPeriodic() {
-    //System.out.println("Distancia medida: " + distance + " metros");
   }
 }

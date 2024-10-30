@@ -136,7 +136,10 @@ public class SwerveModule{
 
     public SwerveModulePosition getModulePosition() {
         return new SwerveModulePosition(driveEncoder.getPosition()*1.21, new Rotation2d(Math.toRadians(directionalEncoder.getAbsolutePosition()-90)));
-        //driveEncoder.setPosition(0);
+    }
+
+    public void resetModulePosition() {
+        driveEncoder.setPosition(0);
     }
 
     private double optimizeOptimize(double da, double Aa){

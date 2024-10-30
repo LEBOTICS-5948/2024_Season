@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Subsystems.Vision.Limelight;
 
 // import edu.wpi.first.math.geometry.Transform2d; Library not used.
 
@@ -71,18 +72,16 @@ public class DriveTrain extends SubsystemBase{
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
     private Field2d field = new Field2d();
     private Pose2d RobotPose2d;
-    private Double yawAdjustment = 0d;
+    private Rotation2d yawAdjustment = new Rotation2d();
     private SwerveDriveOdometry m_odometry;
 
     private DoubleSupplier translationX, translationY, rotationOmega, omegaOverride;
 
-    private Double DEADBAND = 0d;
+    private Double DEADBAND = 0d, angleToTarget = 0.0;
 
     private Boolean FieldRelativeTeleop = true, useOmegaOverride = false;
 
     private DriveTrainState state = DriveTrainState.IDLE, lastState;
-
-    
 
     private DriveTrain() {
         gyro.reset();
@@ -121,22 +120,32 @@ public class DriveTrain extends SubsystemBase{
         SmartDashboard.putNumber("DeadBand_Drift", DEADBAND);
     }
 
-    /* public double getRobotAtjustedRotation() {
-        yawAdjustment = 
-        angle = 
-    } */
+    private double getRobotAtjustedRotation() {
+        //return gyro.getRotation2d().plus(yawAdjustment).getDegrees();
+        return gyro.getYaw();
+    }
+
+    public Rotation2d getRobotAdjustedRotation2d() {
+        //return gyro.getRotation2d().plus(yawAdjustment);
+        return gyro.getRotation2d();
+    }
+
+    public void setAngleToTarget(Double angle) {
+        angleToTarget = angle;
+    }
 
     public Pose2d getPose() {
         return m_odometry.getPoseMeters();
     }
 
     public void resetPose(Pose2d p) {
-        m_odometry.resetPosition(gyro.getRotation2d(), getSwerveModulePositions(), p);
+        m_odometry.resetPosition(getRobotAdjustedRotation2d(), getSwerveModulePositions(), p);
     }
 
-    public void updateOdometry(Pose2d pose) {
-        RobotPose2d = pose;
-        field.setRobotPose(RobotPose2d);
+    public void updateOdometry(Pose2d pose, Rotation2d rot) {
+        resetSwerveModulePositions();
+        yawAdjustment = gyro.getRotation2d().minus(rot);
+        m_odometry.resetPosition(getRobotAdjustedRotation2d(), getSwerveModulePositions(), pose);
     }
 
     public ChassisSpeeds getSpeeds() {
@@ -170,13 +179,15 @@ public class DriveTrain extends SubsystemBase{
         if(DZ != DEADBAND){ DEADBAND = DZ;}
         SmartDashboard.putBoolean("useOmegaOverride", useOmegaOverride);
         SmartDashboard.putBoolean("joystickInput", isJoystickInputPresent());
-        SmartDashboard.putNumber("gyro", gyro.getYaw());
+        SmartDashboard.putNumber("gyro", getRobotAtjustedRotation());
         runState();
         if(!state.equals(DriveTrainState.AUTO)){
             SwerveModuleState[] swerveModuleStates = m_kinematics.toSwerveModuleStates(chassisSpeeds);
             setModuleStates(swerveModuleStates);
         }
 
+        m_odometry.update(getRobotAdjustedRotation2d(), getSwerveModulePositions());
+        field.setRobotPose(m_odometry.getPoseMeters());
     }
 
     private SwerveModulePosition[] getSwerveModulePositions() {
@@ -187,6 +198,13 @@ public class DriveTrain extends SubsystemBase{
             sm_backRight.getModulePosition()
         };
         return positions;
+    }
+
+    private void resetSwerveModulePositions(){
+        sm_backLeft.resetModulePosition();
+        sm_frontLeft.resetModulePosition();
+        sm_frontRight.resetModulePosition();
+        sm_backRight.resetModulePosition();
     }
 
     public void setJoystickSuppliers(DoubleSupplier xInput, DoubleSupplier yInput, DoubleSupplier omegaInput){
@@ -248,7 +266,7 @@ public class DriveTrain extends SubsystemBase{
 
     private void drive(double x, double y, double omega, boolean fieldRelative){
         chassisSpeeds = fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(x, y, omega, gyro.getRotation2d())
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(x, y, omega, getRobotAdjustedRotation2d())
             : new ChassisSpeeds(x, y, omega);
     }
 
@@ -278,21 +296,23 @@ public class DriveTrain extends SubsystemBase{
         sm_backRight.setDesiredState(desiredStates[3]);
     }
 
-    public Command setRotationSuplier(boolean isFixed,Double a){
-        return 
-            Commands.runOnce(() -> {
-                omegaOverride = () -> !isFixed ? null : getFixedOmega(a); 
-                useOmegaOverride = isFixed;
-                lastState = null;
-            }, this);
+    public Command setRotationSupplier(boolean isFixed, Double a) {
+        return Commands.runOnce(() -> {
+            omegaOverride = () -> isFixed ? getFixedOmega(a) : null;
+            useOmegaOverride = isFixed;
+            lastState = null;
+        }, this);
     }
 
-    private double getFixedOmega(double targetAngle) {
-        try (PIDController omegaPID = new PIDController(0.019, 0.0, 0.0)) {
+    private double getFixedOmega(Double targetAngle) {
+        if (targetAngle == null) {
+            targetAngle = angleToTarget;
+        }
+        try (PIDController omegaPID = new PIDController(0.018, 0.0, 0.0)) {
             omegaPID.enableContinuousInput(-180, 180);
             omegaPID.setTolerance(1);
             
-            double error = targetAngle - gyro.getYaw();
+            double error = targetAngle - getRobotAtjustedRotation();
             error = MathUtil.inputModulus(error, -180, 180);
             
             return omegaPID.calculate(error);

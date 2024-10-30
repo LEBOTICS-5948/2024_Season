@@ -57,6 +57,8 @@ public class Shooter extends SubsystemBase{
 
     public boolean isReady, isLoaded = false;
 
+    private double shooterAngle = 0;
+
     private Rev2mDistanceSensor distMXP;
 
     //private double targetRPM; //shooter_speed
@@ -72,7 +74,7 @@ public class Shooter extends SubsystemBase{
             isReady = false;
         }
         runState();
-        if (distMXP.getRange() < 8) {
+        if (distMXP.getRange() < 10) {
             isLoaded = true;
         } else {
             isLoaded = false;
@@ -113,7 +115,7 @@ public class Shooter extends SubsystemBase{
 
         double kP_P, kP_I, kP_D, kP_Iz, kP_FF, kP_MaxOutput, kP_MinOutput;
         // PID coefficients kPosition
-        kP_P = 0.02; 
+        kP_P = 0.018; 
         kP_I = 0;
         kP_D = 0; 
         kP_Iz = 0; 
@@ -154,6 +156,10 @@ public class Shooter extends SubsystemBase{
         l_PIDController.setOutputRange(kV_MinOutput, kV_MaxOutput);
 
         state = ShooterState.STOP;
+    }
+
+    public void setShooterAngle(double a) {
+        shooterAngle = a;
     }
 
     public Command setState(ShooterState _state) {
@@ -210,9 +216,10 @@ public class Shooter extends SubsystemBase{
         }, this);
     }
 
+    //MODIFICAR VELOCIDAD DEL FEEDER
     private Command loadShooter(){
         return Commands.sequence(
-            Commands.runOnce(() -> FeederMotor.set(0.8)),
+            Commands.runOnce(() -> FeederMotor.set(0.30)),
             pivot(0)
         );
     }
@@ -227,11 +234,12 @@ public class Shooter extends SubsystemBase{
 
     private Command launchShooter(){
         return Commands.sequence(
+            pivot(shooterAngle),
             startShooterWheels(5000, 5000),
+            Commands.waitSeconds(1.8),
             Commands.runOnce(() -> FeederMotor.set(1)),
             //Commands.runOnce(() -> intake.setState(IntakeState.IN)),
-            pivot(20),
-            Commands.waitSeconds(3),
+            Commands.waitSeconds(1.2),
             setShooterNeutral(),
             Commands.runOnce(() -> FeederMotor.stopMotor()),
             Commands.runOnce(() -> intake.setState(IntakeState.STOP)),
@@ -242,8 +250,8 @@ public class Shooter extends SubsystemBase{
     private Command prepareShooter(){
         return Commands.sequence(
             Commands.runOnce(() -> FeederMotor.stopMotor()),
-            pivot(20),
-            startShooterWheels(5000, 5000)
+            pivot(shooterAngle),
+            startShooterWheels(2000, 2000)
         );
     }
 

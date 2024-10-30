@@ -81,8 +81,11 @@ public class RobotContainer {
         operatorController.y().toggleOnTrue(intake.setState(IntakeState.STOP));
         
         operatorController.leftTrigger()
-            .toggleOnTrue(shooter.setState(ShooterState.AIM).alongWith(swerveDrive.setRotationSuplier(true, 90.0)))
-            .toggleOnFalse(shooter.setState(ShooterState.STOP).alongWith(swerveDrive.setRotationSuplier(false, null)));
+            .toggleOnTrue(swerveDrive.setRotationSupplier(true, null).alongWith(
+                shooter.setState(ShooterState.AIM) 
+            ))
+            
+            .toggleOnFalse(shooter.setState(ShooterState.STOP).alongWith(swerveDrive.setRotationSupplier(false, null)));
         (operatorController.rightTrigger().and(() -> shooter.isReady))
             .toggleOnTrue(shooter.setState(ShooterState.SHOOT)
         );
