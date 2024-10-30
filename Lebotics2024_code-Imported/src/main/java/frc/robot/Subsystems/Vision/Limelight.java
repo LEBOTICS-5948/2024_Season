@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.limelight.LimelightHelpers;
+import frc.robot.Constants.Variables;
 import frc.robot.Subsystems.DriveTrain;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
@@ -30,7 +31,7 @@ public class Limelight extends SubsystemBase {
         this.swerveDrive = driveTrain;
 
         SmartDashboard.putBoolean("FixedShooterAngle", false);
-        SmartDashboard.putNumber("ShooterAngle", 30);
+        SmartDashboard.putNumber("S_Angle", 50);
     }
 
     public static synchronized Limelight getInstance(DriveTrain driveTrain) {
@@ -45,6 +46,7 @@ public class Limelight extends SubsystemBase {
         SmartDashboard.putBoolean("IsTargeting", limelight.isTargeting());
         SmartDashboard.putNumber("angleToTarget", angloToTarget());
         SmartDashboard.putNumber("distanceToTarget", getDistanceToTarget());
+        SmartDashboard.putNumber("alfaS", getShooterAngle());
 
         if (limelight.isTargeting()) {
             double[] botPose = limelight.getAllianceBotPose();
@@ -61,10 +63,11 @@ public class Limelight extends SubsystemBase {
         
         Boolean FSA = SmartDashboard.getBoolean("FixedShooterAngle", false);
         if(FSA) {
-            return SmartDashboard.getNumber("ShooterAngle", 0);
+            return SmartDashboard.getNumber("S_Angle", 0);
         }else{
-            getDistanceToTarget();
-            return 0;
+            double d = getDistanceToTarget();
+            double angleToTargetRadians = Math.atan2(Variables.ampHeight, d);
+            return Rotation2d.fromRadians(angleToTargetRadians).getDegrees();
         }
     }
 

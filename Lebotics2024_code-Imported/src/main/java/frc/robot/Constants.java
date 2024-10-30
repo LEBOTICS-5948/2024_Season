@@ -26,8 +26,9 @@ public class Constants {
         public static final float SoftLimit = 110f;
     }
 
-    public static class Shooter {
-        public static final double feederSpeed = 0.35;
+    public static class Variables {
+        public static final double feederSpeed = 0.6;
+        public static final double ampHeight = 1.55;
     }
 
 }

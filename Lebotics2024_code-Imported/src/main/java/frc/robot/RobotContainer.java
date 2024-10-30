@@ -18,7 +18,7 @@ import frc.robot.Subsystems.Shooter.ShooterState;
 
 public class RobotContainer {
     private final CommandXboxController driverController = new CommandXboxController(0);
-    private final CommandXboxController operatorController = new CommandXboxController(0);
+    private final CommandXboxController operatorController = new CommandXboxController(1);
 
     private final DriveTrain swerveDrive = DriveTrain.getInstance();
     private final LiftingArms liftingArms = LiftingArms.getInstance();
@@ -83,8 +83,7 @@ public class RobotContainer {
         operatorController.leftTrigger()
             .toggleOnTrue(swerveDrive.setRotationSupplier(true, null).alongWith(
                 shooter.setState(ShooterState.AIM) 
-            ))
-            
+            ))  
             .toggleOnFalse(shooter.setState(ShooterState.STOP).alongWith(swerveDrive.setRotationSupplier(false, null)));
         (operatorController.rightTrigger().and(() -> shooter.isReady))
             .toggleOnTrue(shooter.setState(ShooterState.SHOOT)

@@ -108,8 +108,8 @@ public class Robot extends TimedRobot {
     }
     //DataLogManager.log("Teleop Iniciado.");
     DriveTrain.getInstance().setState(DriveTrainState.JOYSTICKS).schedule();
-    /* Intake.getInstance().setState(IntakeState.STOP).schedule();
-    Shooter.getInstance().setState(ShooterState.STOP).schedule(); */
+    Intake.getInstance().setState(IntakeState.STOP).schedule();
+    Shooter.getInstance().setState(ShooterState.STOP).schedule();
     LiftingArms.getInstance().setState(LiftingArmsState.STOP).schedule();
   }
 
@@ -120,8 +120,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopExit(){
     DriveTrain.getInstance().setState(DriveTrainState.IDLE).schedule();
-    /* Intake.getInstance().setState(IntakeState.STOP).schedule();
-    Shooter.getInstance().setState(ShooterState.STOP).schedule(); */
+    Intake.getInstance().setState(IntakeState.STOP).schedule();
+    Shooter.getInstance().setState(ShooterState.STOP).schedule();
     LiftingArms.getInstance().setState(LiftingArmsState.STOP).schedule();
   }
 

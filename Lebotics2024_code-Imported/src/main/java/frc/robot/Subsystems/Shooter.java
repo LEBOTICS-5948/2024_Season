@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Variables;
 import frc.robot.Subsystems.Intake.IntakeState;
 
 public class Shooter extends SubsystemBase{
@@ -219,7 +220,7 @@ public class Shooter extends SubsystemBase{
     //MODIFICAR VELOCIDAD DEL FEEDER
     private Command loadShooter(){
         return Commands.sequence(
-            Commands.runOnce(() -> FeederMotor.set(0.30)),
+            Commands.runOnce(() -> FeederMotor.set(Variables.feederSpeed)),
             pivot(0)
         );
     }
