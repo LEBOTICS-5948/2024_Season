@@ -46,11 +46,13 @@ public class Robot extends TimedRobot {
   private Rev2mDistanceSensor distMXP;
 
   private Limelight limelight;
+  //private LedController ledController;
   //private UsbCamera camera1;
   
   @Override
   public void robotInit() {
     limelight = Limelight.getInstance(DriveTrain.getInstance());
+    //ledController = new LedController();
     //camera1 = CameraServer.startAutomaticCapture(0);
     robotContainer = new RobotContainer();
     distOnboard = new Rev2mDistanceSensor(Port.kOnboard);

@@ -18,9 +18,9 @@ public class LedController extends SubsystemBase {
     // Esto sirve para apagar las leds del robot al iniciarse.
     LedMode mode = LedMode.OFF;
 
-    private LedController() {
+    public LedController() {
         tejuinoBoard = new TejuinoBoard();
-        tejuinoBoard.turn_off_all_leds(0);
+        //tejuinoBoard.turn_off_all_leds(0);
     }
 
     @Override
