@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Subsystems.DriveTrain;
+import frc.robot.Subsystems.DriveTrain.DriveTrainState;
 import frc.robot.Subsystems.Intake;
 import frc.robot.Subsystems.LiftingArms;
 import frc.robot.Subsystems.Shooter;
@@ -18,7 +19,7 @@ import frc.robot.Subsystems.Shooter.ShooterState;
 
 public class RobotContainer {
     private final CommandXboxController driverController = new CommandXboxController(0);
-    private final CommandXboxController operatorController = new CommandXboxController(1);
+    private final CommandXboxController operatorController = new CommandXboxController(1);// cambiar a 0 para manejar todo con un control
 
     private final DriveTrain swerveDrive = DriveTrain.getInstance();
     private final LiftingArms liftingArms = LiftingArms.getInstance();
@@ -32,24 +33,46 @@ public class RobotContainer {
         NamedCommands.registerCommand("stopShooter", Commands.sequence(
             shooter.setState(ShooterState.STOP)
         ));
-        NamedCommands.registerCommand("take", Commands.sequence(
-            shooter.setState(ShooterState.STOP),
-            Commands.waitSeconds(0.5)
+        NamedCommands.registerCommand("intakeStart", Commands.sequence(
+            intake.setState(IntakeState.IN),
+            shooter.setState(ShooterState.LOAD)
         ));
+
+        NamedCommands.registerCommand("intakeStop", Commands.sequence(
+            intake.setState(IntakeState.STOP),
+            shooter.setState(ShooterState.STOP)
+        ));
+        NamedCommands.registerCommand("shoot", 
+            Commands.sequence(
+                //swerveDrive.setState(DriveTrainState.JOYSTICKS),
+                swerveDrive.setRotationSupplier(true, null),
+                shooter.setState(ShooterState.AIM),
+                Commands.waitSeconds(0.5),
+                shooter.setState(ShooterState.SHOOT),
+                Commands.waitSeconds(2),
+                shooter.setState(ShooterState.STOP),
+                swerveDrive.setRotationSupplier(false, null)
+                //swerveDrive.setState(DriveTrainState.AUTO)
+            )
+        );
         
         configureBindings();
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Mode", autoChooser);  
     }
 
-    private Command retractifneeded(){
-        if(intake.isLoaded && !intake.isIntaking){
-            return new Command(){};
-        }else{
+    private Command shootifneeded(){
+        if(shooter.isReady){
+            
             return Commands.sequence(
-                intake.setState(IntakeState.STOP),
-                Commands.waitSeconds(0.5)
+                shooter.setState(ShooterState.AIM),
+                Commands.waitSeconds(0.5),
+                shooter.setState(ShooterState.SHOOT),
+                Commands.waitSeconds(2),
+                shooter.setState(ShooterState.STOP)
             );
+        }else{
+            return new Command(){};
         }
     }
 

@@ -5,24 +5,12 @@
       "x": 1.3533001663498863,
       "y": 5.551187918118234
     },
-    "rotation": 0.0
+    "rotation": -179.63996908858496
   },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
-        {
-          "type": "named",
-          "data": {
-            "name": "startShooter"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.2
-          }
-        },
         {
           "type": "named",
           "data": {
@@ -38,7 +26,37 @@
         {
           "type": "named",
           "data": {
-            "name": "stopShooter"
+            "name": "intakeStart"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Aro1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeStop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
           }
         }
       ]

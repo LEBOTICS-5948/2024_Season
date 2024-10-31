@@ -31,7 +31,7 @@ public class Limelight extends SubsystemBase {
         this.swerveDrive = driveTrain;
 
         SmartDashboard.putBoolean("FixedShooterAngle", false);
-        SmartDashboard.putNumber("S_Angle", 50);
+        SmartDashboard.putNumber("S_Angle", 45);
     }
 
     public static synchronized Limelight getInstance(DriveTrain driveTrain) {

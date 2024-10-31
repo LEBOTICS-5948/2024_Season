@@ -188,6 +188,10 @@ public class DriveTrain extends SubsystemBase{
 
         m_odometry.update(getRobotAdjustedRotation2d(), getSwerveModulePositions());
         field.setRobotPose(m_odometry.getPoseMeters());
+
+        if(SmartDashboard.getBoolean("FixedShooterAngle", false)) {
+            useOmegaOverride = false;
+        }
     }
 
     private SwerveModulePosition[] getSwerveModulePositions() {
@@ -297,6 +301,7 @@ public class DriveTrain extends SubsystemBase{
     }
 
     public Command setRotationSupplier(boolean isFixed, Double a) {
+        
         return Commands.runOnce(() -> {
             omegaOverride = () -> isFixed ? getFixedOmega(a) : null;
             useOmegaOverride = isFixed;

@@ -236,8 +236,8 @@ public class Shooter extends SubsystemBase{
     private Command launchShooter(){
         return Commands.sequence(
             pivot(shooterAngle),
-            startShooterWheels(5000, 5000),
-            Commands.waitSeconds(1.8),
+            startShooterWheels(4000, 4000),
+            Commands.waitSeconds(1.5),
             Commands.runOnce(() -> FeederMotor.set(1)),
             //Commands.runOnce(() -> intake.setState(IntakeState.IN)),
             Commands.waitSeconds(1.2),
