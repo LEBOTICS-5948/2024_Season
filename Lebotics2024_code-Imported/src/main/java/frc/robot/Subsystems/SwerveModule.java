@@ -3,12 +3,10 @@ package frc.robot.Subsystems;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
-import com.revrobotics.CANSparkLowLevel.MotorType;
-
-//import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-// import com.revrobotics.CANSparkBase.IdleMode; Library not used.
+import com.revrobotics.CANSparkBase.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -32,8 +30,8 @@ public class SwerveModule{
     private final RelativeEncoder driveEncoder;
     private final CANCoder directionalEncoder;
 
-    private final SparkPIDController turningPIDController;
-    private final SparkPIDController drivePIDController;
+    private final SparkMaxPIDController turningPIDController;
+    private final SparkMaxPIDController drivePIDController;
 
     private SwerveModuleState state = new SwerveModuleState();
 

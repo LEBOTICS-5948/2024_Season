@@ -21,9 +21,9 @@ public class Constants {
             new Translation2d(WheelToWheelDistance/2,-WheelToWheelDistance/2)); //Rear Right Module
     }
     public static class LiftingArmsConstants{
-        public static final int LeftArmID = 14;
-        public static final int RightArmID = 15;
-        public static final float SoftLimit = 110f;
+        public static final int LeftArmID = 13;
+        public static final int RightArmID = 14;
+        public static final float SoftLimit = 93.5f;
     }
 
 }

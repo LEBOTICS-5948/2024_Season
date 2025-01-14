@@ -14,6 +14,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -29,8 +30,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SwerveConstants;
-
-// import edu.wpi.first.math.geometry.Transform2d; Library not used.
 
 public class DriveTrain extends SubsystemBase{
 
@@ -50,10 +49,10 @@ public class DriveTrain extends SubsystemBase{
         STOP,
     }
 
-    private final SwerveModule sm_backLeft = new SwerveModule(7, 8, 3,false); // 1
-    private final SwerveModule sm_frontLeft = new SwerveModule(5, 6, 6,false); // 2
-    private final SwerveModule sm_frontRight = new SwerveModule(3, 4, 9,true); // 3
-    private final SwerveModule sm_backRight = new SwerveModule(1, 2, 12,true); // 4
+    private final SwerveModule sm_backLeft = new SwerveModule(1, 2, 3,false); // 1
+    private final SwerveModule sm_frontLeft = new SwerveModule(4, 5, 6,false); // 2
+    private final SwerveModule sm_frontRight = new SwerveModule(7, 8, 9,true); // 3
+    private final SwerveModule sm_backRight = new SwerveModule(10, 11, 12,true); // 4
 
     //    .---.         .---.
     //    | 2 |▩▩▩▩▩▩| 3 |
@@ -66,7 +65,7 @@ public class DriveTrain extends SubsystemBase{
     //    '---'         '---'
 
     private final AHRS gyro = new AHRS(Port.kMXP);
-    
+
     private final SwerveDriveKinematics m_kinematics = SwerveConstants.Kinematics;
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
     private Field2d field = new Field2d();
